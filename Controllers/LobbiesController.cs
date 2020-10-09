@@ -26,7 +26,42 @@ namespace QuizAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Lobby>>> GetLobbyItems()
         {
-            return await _context.LobbyItems.ToListAsync();
+            string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
+            SqlConnection cnn = new SqlConnection(connetionString);
+            SqlCommand cmd = new SqlCommand("SELECT * FROM lobby;", cnn);
+
+            cnn.Open();
+            SqlDataReader data = cmd.ExecuteReader();
+
+            if(data.HasRows == false)
+            {
+                data.Close();
+                cmd.Dispose();
+                cnn.Close();
+                return Ok("No records");
+            }
+
+            //create lobby object
+            List<Lobby> lobbies = new List<Lobby>();
+            Lobby tmp;
+
+			while(data.Read())
+			{
+                tmp = new Lobby();
+                tmp.id = data.GetInt32(0);
+                tmp.easyToken = data.GetString(1);
+                tmp.mediumToken = data.GetString(2);
+                tmp.hardToken = data.GetString(3);
+                tmp.requestURL = data.GetString(4);
+
+                lobbies.Add(tmp);
+            }
+
+            data.Close();
+            cmd.Dispose();
+            cnn.Close();
+
+            return lobbies;
         }
 
         // GET: api/Lobbies/5
@@ -76,23 +111,19 @@ namespace QuizAPI.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(lobby).State = EntityState.Modified;
+            string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
+            SqlConnection cnn = new SqlConnection(connetionString);
+            SqlCommand cmd = new SqlCommand("UPDATE lobby " +
+                                            "SET easyToken = '" + lobby.easyToken + 
+                                            "', mediumToken = '" + lobby.mediumToken + 
+                                            "', hardToken = '" + lobby.hardToken +
+                                            "', requestURL = '" + lobby.requestURL + "' " +
+                                            "WHERE Id = " + id + ";", cnn);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!LobbyExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            cnn.Open();
+            cmd.ExecuteNonQuery();
+            cmd.Dispose();
+            cnn.Close();
 
             return NoContent();
         }
@@ -103,8 +134,15 @@ namespace QuizAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Lobby>> PostLobby(Lobby lobby)
         {
-            _context.LobbyItems.Add(lobby);
-            await _context.SaveChangesAsync();
+            string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
+            SqlConnection cnn = new SqlConnection(connetionString);
+            SqlCommand cmd = new SqlCommand("INSERT INTO lobby(Id, easyToken, mediumToken, hardToken, requestURL) " +
+                                            "VALUES(" + lobby.id + ", '" + lobby.easyToken + "', '" + lobby.mediumToken + "', '" + lobby.hardToken + "', '" + lobby.requestURL + "');", cnn);
+
+            cnn.Open();
+            cmd.ExecuteNonQuery();
+            cmd.Dispose();
+            cnn.Close();
 
             return CreatedAtAction("GetLobby", new { id = lobby.id }, lobby);
         }
@@ -113,16 +151,31 @@ namespace QuizAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<Lobby>> DeleteLobby(int id)
         {
-            var lobby = await _context.LobbyItems.FindAsync(id);
-            if (lobby == null)
+            string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
+            SqlConnection cnn = new SqlConnection(connetionString);
+            SqlCommand cmd = new SqlCommand("SELECT Id FROM lobby WHERE Id=" + id + ";", cnn);
+
+            cnn.Open();
+            SqlDataReader data = cmd.ExecuteReader();
+
+            if (data.HasRows == false)
             {
+                data.Close();
+                cmd.Dispose();
+                cnn.Close();
                 return NotFound();
             }
 
-            _context.LobbyItems.Remove(lobby);
-            await _context.SaveChangesAsync();
+            data.Close();
+            cmd.Dispose();
 
-            return lobby;
+            cmd = new SqlCommand("DELETE FROM lobby WHERE Id = " + id + ";", cnn);
+            cmd.ExecuteNonQuery();
+
+            cmd.Dispose();
+            cnn.Close();
+
+            return Ok("Lobby deleted");
         }
 
         private bool LobbyExists(int id)
