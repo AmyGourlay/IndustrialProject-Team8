@@ -12,5 +12,5 @@ namespace QuizAPI.Models
 		public string mediumToken { get; set; }
 		public string hardToken { get; set; }
 		public string requestURL { get; set; }
-}
+	}
 }

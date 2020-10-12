@@ -22,7 +22,9 @@ namespace QuizAPI
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddDbContext<LobbyContext>(opt =>
-			  opt.UseSqlServer("Server=riddlers.database.windows.net; Database=quizgame; User ID=team8@riddlers; Password=b7zYDzhJ;"));
+			  opt.UseSqlServer("empty"));
+			services.AddDbContext<PlayerContext>(opt =>
+			  opt.UseSqlServer("empty"));
 			services.AddControllers();
 		}
 
