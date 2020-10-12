@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using QuizAPI.Models;
 
 namespace QuizAPI.Controllers
@@ -35,7 +34,7 @@ namespace QuizAPI.Controllers
                 data.Close();
                 cmd.Dispose();
                 cnn.Close();
-                return Ok("No records");
+                return NotFound();
             }
 
             //create player object
@@ -76,7 +75,7 @@ namespace QuizAPI.Controllers
                 data.Close();
                 cmd.Dispose();
                 cnn.Close();
-                return Ok(id);
+                return NotFound();
             }
 
             //create lobby object

@@ -34,7 +34,7 @@ namespace QuizAPI.Controllers
                 data.Close();
                 cmd.Dispose();
                 cnn.Close();
-                return Ok("No records");
+                return NotFound();
             }
 
             //create lobby object
@@ -76,7 +76,7 @@ namespace QuizAPI.Controllers
                 data.Close();
                 cmd.Dispose();
                 cnn.Close();
-                return Ok(id);
+                return NotFound();
             }
 
             //create lobby object
