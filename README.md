@@ -1,4 +1,4 @@
-# quizz-frontend
+# Quizz.io
 
 ## Build Setup
 
