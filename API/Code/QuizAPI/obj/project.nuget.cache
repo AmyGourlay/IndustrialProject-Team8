@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "hwniaGZu2in7b9bXLfMUM+s97Tts9HAI+/JkOhrFKzGYyu7ioaiL6TcrbCDNk7kvds7cX0aeCJJVq+5La0sHsA==",
+  "dgSpecHash": "+sRh+JefGnc/3iBp274X8wzm93Jm7nQ2VeMNC5yu5nj+b6vpgfGd7ZqCef5By4AaGbcVXTbQzYBsr4FWlXlRiQ==",
   "success": true,
-  "projectFilePath": "D:\\Documents\\repos\\Visual C#\\QuizAPI\\QuizAPI\\QuizAPI.csproj",
+  "projectFilePath": "C:\\Users\\kylel\\Documents\\GitHub\\IndustrialProject-Team8\\API\\Code\\QuizAPI\\QuizAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\kylel\\.nuget\\packages\\microsoft.aspnetcore.html.abstractions\\2.2.0\\microsoft.aspnetcore.html.abstractions.2.2.0.nupkg.sha512",
     "C:\\Users\\kylel\\.nuget\\packages\\microsoft.aspnetcore.razor\\2.2.0\\microsoft.aspnetcore.razor.2.2.0.nupkg.sha512",

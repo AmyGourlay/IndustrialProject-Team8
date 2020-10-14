@@ -8825,11 +8825,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Documents\\repos\\Visual C#\\QuizAPI\\QuizAPI\\QuizAPI.csproj",
+      "projectUniqueName": "C:\\Users\\kylel\\Documents\\GitHub\\IndustrialProject-Team8\\API\\Code\\QuizAPI\\QuizAPI.csproj",
       "projectName": "QuizAPI",
-      "projectPath": "D:\\Documents\\repos\\Visual C#\\QuizAPI\\QuizAPI\\QuizAPI.csproj",
+      "projectPath": "C:\\Users\\kylel\\Documents\\GitHub\\IndustrialProject-Team8\\API\\Code\\QuizAPI\\QuizAPI.csproj",
       "packagesPath": "C:\\Users\\kylel\\.nuget\\packages\\",
-      "outputPath": "D:\\Documents\\repos\\Visual C#\\QuizAPI\\QuizAPI\\obj\\",
+      "outputPath": "C:\\Users\\kylel\\Documents\\GitHub\\IndustrialProject-Team8\\API\\Code\\QuizAPI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\kylel\\AppData\\Roaming\\NuGet\\NuGet.Config",
