@@ -37,8 +37,29 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/buefy
     'nuxt-buefy',
+    '@nuxt/http',
+
   ],
 
+  http: {
+      // proxyHeaders: false
+      proxy: true
+  },
+
+  proxy: {
+    '/quizApi/': {
+      target: 'https://riddlersquizapi.azurewebsites.net',
+      pathRewrite: { '^/quizApi/': '/api/' }
+    },
+    '/getQToken/': {
+      target: 'https://opentdb.com',
+      pathRewrite: { '^/getQToken/': '/api_token.php?command=request'}
+    },
+    '/getQuestions/': {
+      target: 'https://opentdb.com',
+      pathRewrite: { '^/getQuestions/': '/api.php?'}
+    }
+  },
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
   }
