@@ -1,1 +1,0 @@
-# IndustrialProject-Team8
