@@ -109,14 +109,30 @@ namespace QuizAPI.Controllers
 
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("UPDATE lobby " +
+            SqlCommand cmd = new SqlCommand("SELECT * FROM player WHERE id=" + id + ";", cnn);
+
+            cnn.Open();
+            SqlDataReader data = cmd.ExecuteReader();
+
+            if(data.HasRows == false)
+            {
+                data.Close();
+                cmd.Dispose();
+                cnn.Close();
+                return NotFound();
+            }
+
+            data.Close();
+            cmd.Dispose();
+
+            connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
+            cmd = new SqlCommand("UPDATE lobby " +
                                             "SET easyToken = '" + lobby.easyToken + 
                                             "', mediumToken = '" + lobby.mediumToken + 
                                             "', hardToken = '" + lobby.hardToken +
                                             "', requestURL = '" + lobby.requestURL + "' " +
                                             "WHERE Id = " + id + ";", cnn);
 
-            cnn.Open();
             cmd.ExecuteNonQuery();
             cmd.Dispose();
             cnn.Close();
