@@ -2,15 +2,47 @@
   <div class="container">
     <div class="tile is-ancestor">
       <div class="tile is-parent is-8">
-        <article class="tile is-child box">
+        <article class="tile is-child box"><!-- QUESTION TILE -->
           <p class="title" id="questionNumber">Question 000</p>
           <p class="subtitle" id="questionTopic">Topic: ---</p>
           <div class="content">
-            <p class="is-large" id="questionBox"></p>
+            <p class="is-size-3-tablet" id="questionBox"></p>
           </div>
         </article>
       </div>
-      <div class="tile is-parent">
+      <div class="tile is-parent is-vertical"> <!-- SCORE AND LIFELINE TILES -->
+        <article class="tile is-child box">
+          <p class="title centered">Lifelines</p>
+          <p class="subtitle">Need some help? This is the place!</p>
+          <div class="buttons">
+            <b-button class="tile is-vertical large field is-grouped is-danger">50/50</b-button>
+            <b-button class="tile is-vertical large field is-grouped is-danger">Skip Question</b-button>
+          </div>
+        </article>
+        <article class="tile is-child box">
+          <p class="title" id="playerPosition">2nd</p>
+          <p class="subtitle" id="playerScore">Score: 3000</p>
+        </article>
+      </div>
+    </div>
+    <div class="tile is-ancestor">
+      <div class="tile is-parent is-vertical buttons">
+        <b-button @click="checkAnswer('ansOne')" class="tile is-size-3-tablet is-child field is-grouped is-primary">
+          <p class="is-size-3-tablet answerLabel" id="ansOne">----</p>
+        </b-button>
+        <b-button @click="checkAnswer('ansTwo')" class="tile is-size-3-tablet is-child field is-grouped is-primary">
+          <p class="is-size-3-tablet answerLabel" id="ansTwo">----</p>
+        </b-button>
+      </div>
+      <div class="tile is-parent is-vertical buttons">
+        <b-button @click="checkAnswer('ansThree')" class="tile is-size-3-tablet is-child field is-grouped is-primary">
+          <p class="is-size-3-tablet answerLabel" id="ansThree">----</p>
+        </b-button>
+        <b-button @click="checkAnswer('ansFour')" class="tile is-size-3-tablet is-child field is-grouped is-primary">
+          <p class="is-size-3-tablet answerLabel" id="ansFour">----</p>
+        </b-button>
+      </div>
+      <div class="tile is-parent is-4"> <!-- LEADERBOARD TILE -->
         <article class="tile is-child box">
           <p class="subtitle">Wondering how your competitors are doing? This is the place for you 👀</p>
           <div class="message">
@@ -36,7 +68,7 @@
         </article>
       </div>
     </div>
-    <button @click="getQsTokens">Refresh Data</button>
+    <!--<button @click="getQsTokens">Refresh Data</button>
     <div>
       <h1>Lobby info</h1>
       <p v-if="$fetchState.pending">Fetching lobby details ...</p>
@@ -48,7 +80,8 @@
           {{ this.lobbyInfo }}
         </p>
       </ul>
-    </div>
+    </div>-->
+
   </div> <!-- closing container tag-->
 </template>
 
@@ -59,8 +92,10 @@ export default {
     return {
         tableData: [],
         currQuestion: 1,
+        currQuestionJSON: null,
         userLobbyId: 90909090,
         nickname: "xXx_tr1v1a_G0d_xXx",
+        score: 3000,
         tableColumns: [
             {
                 field: 'name',
@@ -76,69 +111,99 @@ export default {
             }
         ],
       lobbyInfo: [],
-      tokens: [],
       easyQs: [],
       mediumQs: [],
       hardQs: []
     }
   },
   methods: {
-    getQsTokens() {
+    startGame() {
       console.log("YAY");
-      this.getExistingQs();
+      this.getNewQs();
+    },
+    checkAnswer(buttonId) {
+      console.info(document.getElementById(buttonId).innerHTML)
+      if (document.getElementById(buttonId).innerHTML == this.currQuestionJSON.correct_answer) {
+        alert("Correct answer! ✔");
+        this.updatePlayerScore(500);
+      }
+      else {
+        alert("Wrong answer! ❌");
+        this.updatePlayerScore(-500);
+      }
+      this.getNextQuestion();
+    },
+    updatePlayerScore(adjustment) {
+      this.score += adjustment;
+      document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;
+      refreshLeaderboard();
+      this.tableData.sort(function (a,b) {
+        return b.score - a.score;
+      })
+      // TODO: Update the player score in the database HERE
+    },
+    getNextQuestion() {
+      this.currQuestion++;
+      // TODO: Update the question index in the database HERE
+      this.loadQs();
     },
     async refreshLeaderboard() {
       this.tableData = await fetch(`/quizApi/Players/inlobby/${this.userLobbyId}`).then((res) => res.json());
-      // console.info(this.tableData);
+      console.info(this.tableData);
     },
     async getExistingQs() {  // for existing lobbies
       this.lobbyInfo = await fetch(`/quizApi/Lobbies/${this.userLobbyId}`).then((res) => res.json());
-      this.tokens[0] = this.lobbyInfo.easyToken;
-      this.tokens[1] = this.lobbyInfo.mediumToken;
-      this.tokens[2] = this.lobbyInfo.hardToken;
       this.loadQs();
     },
     async getNewQs() { // for new lobbies only
-      this.tokens[0] = await fetch('/getQToken/').then((res) => res.json()).then((res) => res.token); // getting the tokens for each of the difficulties
-      this.tokens[1] = await fetch('/getQToken/').then((res) => res.json()).then((res) => res.token);
-      this.tokens[2] = await fetch('/getQToken/').then((res) => res.json()).then((res) => res.token);
-      this.createLobby(); // sending the tokens to the API for storage in the DB.
-      this.loadQs();
-    },
-    async loadQs() {
-      this.easyQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=easy&type=multiple&token=${this.tokens[0]}`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
-      this.mediumQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=medium&type=multiple&token=${this.tokens[1]}`).then((res) => res.json()).then((res) => res.results);
-      this.hardQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=hard&type=multiple&token=${this.tokens[2]}`).then((res) => res.json()).then((res) => res.results);
+      this.easyQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=easy&type=multiple`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
+      this.mediumQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=medium&type=multiple`).then((res) => res.json()).then((res) => res.results);
+      this.hardQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=hard&type=multiple`).then((res) => res.json()).then((res) => res.results);
       console.info(this.easyQs);
       console.info(this.mediumQs);
       console.info(this.hardQs);
+      // this.createLobby(); // sending the tokens to the API for storage in the DB.
+      this.loadQs();
+    },
+    loadQs() {
       console.info(this.currQuestion - 1);
-      document.getElementById("questionNumber").innerHTML = `Question ${this.currQuestion}`;
-      document.getElementById("questionTopic").innerHTML = `Topic: `
       if (this.currQuestion <= 10) {
-        document.getElementById("questionBox").innerHTML = this.easyQs[this.currQuestion-1].question;
-        document.getElementById("questionTopic").innerHTML = `Topic: ${this.easyQs[this.currQuestion-1].category}`
-        console.info(this.easyQs[this.currQuestion-1]);
-        console.info(this.tokens[0]);
+        this.currQuestionJSON = this.easyQs[this.currQuestion -1];
       }
       else if (this.currQuestion <= 20 && this.currQuestion > 10) {
-        document.getElementById("questionBox").innerHTML = this.mediumQs[this.currQuestion-1].question;
-        document.getElementById("questionTopic").innerHTML = `Topic: ${this.mediumQs[this.currQuestion-1].category}`
-        console.info(this.mediumQs[this.currQuestion-1]);
+        this.currQuestionJSON = this.mediumQs[this.currQuestion -1];
       }
       else if (this.currQuestion <= 30 && this.currQuestion > 20) {
-        document.getElementById("questionBox").innerHTML = this.hardQs[this.currQuestion-1].question;
-        document.getElementById("questionTopic").innerHTML = `Topic: ${this.hardQs[this.currQuestion-1].category}`
-        console.info(this.hardQs[this.currQuestion-1]);
+        this.currQuestionJSON = this.hardQs[this.currQuestion -1];
       }
+      console.info(this.currQuestionJSON);
+      document.getElementById("questionNumber").innerHTML = `Question ${this.currQuestion}`;  // updates the question number and the topic
+      document.getElementById("questionTopic").innerHTML = `Topic: ${this.currQuestionJSON.category}`
+      this.updateQuestion();
+    },
+    updateQuestion() { // pick a random number between 1 and 4, this will be used to asign the correct answer to a button.
+      document.getElementById("questionBox").innerHTML = this.currQuestionJSON.question;  // updates the question box and shows the question to the player
+      const correctAnswer = this.getRandomNum(0,3);
+      const answerLabels = document.getElementsByClassName("answerLabel");
+      answerLabels[correctAnswer].innerHTML = this.currQuestionJSON.correct_answer;
+      let counter = 0;
+      for (let i = 0; i < answerLabels.length; i++) { // assigns the other answers to the remaining buttons
+        if (answerLabels[i].innerHTML != this.currQuestionJSON.correct_answer) {
+          answerLabels[i].innerHTML = this.currQuestionJSON.incorrect_answers[counter];
+          counter++;
+        }
+      }
+    },
+    getRandomNum (min, max) { // SOURCE: https://www.freecodecamp.org/news/how-to-use-javascript-math-random-as-a-random-number-generator/
+      return Math.floor(Math.random() * (max - min + 1)) + min;
     },
     async createLobby() {
       const date = new Date();
       const newLobby = {
         id: this.userLobbyId,
-        easyToken: this.tokens[0],
-        mediumToken: this.tokens[1],
-        hardToken: this.tokens[2],
+        easyQs: JSON.stringify(this.easyQs),
+        mediumQs: JSON.stringify(this.mediumQs),
+        hardQs: JSON.stringify(this.hardQs),
         date: date.toISOString(),
         requestURL: "amount=10&category=9&type=multiple"
       };
@@ -157,7 +222,7 @@ export default {
     document.getElementById("lobbyCode").innerHTML = this.userLobbyId;
     document.getElementById("userNickname").innerHTML = this.nickname;
     this.refreshLeaderboard();
-    this.getQsTokens();
+    this.startGame();
   },
 }
 
