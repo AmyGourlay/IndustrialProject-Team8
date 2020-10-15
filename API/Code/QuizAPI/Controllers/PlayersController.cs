@@ -199,7 +199,7 @@ namespace QuizAPI.Controllers
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
             SqlCommand cmd = new SqlCommand("INSERT INTO player(PlayerName, Score, lobbyId, questionIndex) " +
-                                            "VALUES(" player.name + "', "  + player.score + ", " + player.lobbyId + ", " + player.questionIndex + ");", cnn);
+                                            "VALUES(" + player.name + "', "  + player.score + ", " + player.lobbyId + ", " + player.questionIndex + ");", cnn);
 
             cnn.Open();
             cmd.ExecuteNonQuery();
