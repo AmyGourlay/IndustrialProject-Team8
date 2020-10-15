@@ -1,80 +1,55 @@
 <template>
-
   <div class="container">
-    <!--<section class="section is-small">
-      <div class="tile is-ancestor">
-        <div class="tile is-parent">
-          <div class="tile is-child box">
-            <p class="title">Quizz.io 📝</p>
-          </div>
-        </div>
-        <div class="tile is-parent">
-          <div class="tile is-child box">
-            <p class="title"> xXx_qUizL0rdE_xXx </p>
-          </div>
-        </div>
-        <div class="tile is-parent">
-          <article class="tile is-child box">
-            <b-button class="is-danger is-large">Leave Game   </b-button>
-          </article>
-        </div>
-      </div>
-    </section>
-    <section class="section">
-      <div class="tile ">
-          <article class="tile is-child notification is-primary">
-            <p class="title">Question 69</p>
-            <p class="subtitle"> Topic - Computers?</p>
-            <div class="content">
-              birds are government drones
-            </div>
-          </article>
-          <article class="tile is-child is-info notification is-4">
-            <p class="title"> MY LAST TRACK JUST WENT VIRAL! </p>
-          </article>
-        </div>
-
-    </section>-->
-
-
     <div class="tile is-ancestor">
       <div class="tile is-parent is-8">
         <article class="tile is-child box">
-          <p class="title">Question 69</p>
-          <p class="subtitle">Topic: Computers?</p>
+          <p class="title" id="questionNumber">Question 000</p>
+          <p class="subtitle" id="questionTopic">Topic: ---</p>
           <div class="content">
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ornare magna eros, eu pellentesque tortor vestibulum ut. Maecenas non massa sem. Etiam finibus odio quis feugiat facilisis.</p>
+            <p class="is-large" id="questionBox"></p>
           </div>
         </article>
       </div>
       <div class="tile is-parent">
         <article class="tile is-child box">
           <p class="subtitle">Wondering how your competitors are doing? This is the place for you 👀</p>
-          <article class="message">
-          <div class="message-header">
-            <p>Leaderboard</p>
+          <div class="message">
+            <div class="message-header">
+              <p>Leaderboard</p>
+              <b-button class="button" type="is-primary" @click="refreshLeaderboard">
+                <b-icon class="icon" pack="mdi" icon="refresh">
+                </b-icon>
+              </b-button>
+            </div>
+            <div class="message-body">
+              <b-table
+                :data="tableData"
+                :columns="tableColumns"
+                :perPage="5"
+                paginated
+                default-sort="score"
+                default-sort-direction="desc"
+                :paginationSimple="false"
+              ></b-table>
+            </div>
           </div>
-          <div class="message-body">
-            <b-table :data="tableData" :columns="tableColumns"></b-table>
-          </div>
-        </article>
         </article>
       </div>
     </div>
     <button @click="getQsTokens">Refresh Data</button>
     <div>
-    <h1>Lobby info</h1>
-    <p v-if="$fetchState.pending">Fetching lobby details ...</p>
-    <p v-else-if="$fetchState.error">
-      Error while fetching lobby details: {{ $fetchState.error.message }}
-    </p>
-    <ul v-else>
-      <p>
-        {{ this.lobbyInfo }}
+      <h1>Lobby info</h1>
+      <p v-if="$fetchState.pending">Fetching lobby details ...</p>
+      <p v-else-if="$fetchState.error">
+        Error while fetching lobby details: {{ $fetchState.error.message }}
       </p>
-    </ul>
-  </div>
-  </div>
+      <ul v-else>
+        <p>
+          {{ this.lobbyInfo }}
+        </p>
+      </ul>
+    </div>
+  </div> <!-- closing container tag-->
 </template>
 
 <script>
@@ -83,10 +58,12 @@ export default {
   data() {
     return {
         tableData: [],
-        userLobbyId: 99990000,
+        currQuestion: 1,
+        userLobbyId: 90909090,
+        nickname: "xXx_tr1v1a_G0d_xXx",
         tableColumns: [
             {
-                field: 'nickname',
+                field: 'name',
                 label: 'Nickname',
                 width: '40',
             },
@@ -108,24 +85,61 @@ export default {
   methods: {
     getQsTokens() {
       console.log("YAY");
-      this.getQuestions();
+      this.getExistingQs();
     },
-    async getQuestions() {
+    async refreshLeaderboard() {
+      this.tableData = await fetch(`/quizApi/Players/inlobby/${this.userLobbyId}`).then((res) => res.json());
+      // console.info(this.tableData);
+    },
+    async getExistingQs() {  // for existing lobbies
+      this.lobbyInfo = await fetch(`/quizApi/Lobbies/${this.userLobbyId}`).then((res) => res.json());
+      this.tokens[0] = this.lobbyInfo.easyToken;
+      this.tokens[1] = this.lobbyInfo.mediumToken;
+      this.tokens[2] = this.lobbyInfo.hardToken;
+      this.loadQs();
+    },
+    async getNewQs() { // for new lobbies only
       this.tokens[0] = await fetch('/getQToken/').then((res) => res.json()).then((res) => res.token); // getting the tokens for each of the difficulties
       this.tokens[1] = await fetch('/getQToken/').then((res) => res.json()).then((res) => res.token);
       this.tokens[2] = await fetch('/getQToken/').then((res) => res.json()).then((res) => res.token);
-      this.easyQs = await fetch('/getQuestions/amount=10&category=9&difficulty=easy&type=multiple').then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
-      this.mediumQs = await fetch('/getQuestions/amount=10&category=9&difficulty=medium&type=multiple').then((res) => res.json()).then((res) => res.results);
-      this.hardQs = await fetch('/getQuestions/amount=10&category=9&difficulty=hard&type=multiple').then((res) => res.json()).then((res) => res.results);
       this.createLobby(); // sending the tokens to the API for storage in the DB.
+      this.loadQs();
     },
-
+    async loadQs() {
+      this.easyQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=easy&type=multiple&token=${this.tokens[0]}`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
+      this.mediumQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=medium&type=multiple&token=${this.tokens[1]}`).then((res) => res.json()).then((res) => res.results);
+      this.hardQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=hard&type=multiple&token=${this.tokens[2]}`).then((res) => res.json()).then((res) => res.results);
+      console.info(this.easyQs);
+      console.info(this.mediumQs);
+      console.info(this.hardQs);
+      console.info(this.currQuestion - 1);
+      document.getElementById("questionNumber").innerHTML = `Question ${this.currQuestion}`;
+      document.getElementById("questionTopic").innerHTML = `Topic: `
+      if (this.currQuestion <= 10) {
+        document.getElementById("questionBox").innerHTML = this.easyQs[this.currQuestion-1].question;
+        document.getElementById("questionTopic").innerHTML = `Topic: ${this.easyQs[this.currQuestion-1].category}`
+        console.info(this.easyQs[this.currQuestion-1]);
+        console.info(this.tokens[0]);
+      }
+      else if (this.currQuestion <= 20 && this.currQuestion > 10) {
+        document.getElementById("questionBox").innerHTML = this.mediumQs[this.currQuestion-1].question;
+        document.getElementById("questionTopic").innerHTML = `Topic: ${this.mediumQs[this.currQuestion-1].category}`
+        console.info(this.mediumQs[this.currQuestion-1]);
+      }
+      else if (this.currQuestion <= 30 && this.currQuestion > 20) {
+        document.getElementById("questionBox").innerHTML = this.hardQs[this.currQuestion-1].question;
+        document.getElementById("questionTopic").innerHTML = `Topic: ${this.hardQs[this.currQuestion-1].category}`
+        console.info(this.hardQs[this.currQuestion-1]);
+      }
+    },
     async createLobby() {
+      const date = new Date();
       const newLobby = {
-        id: 10101010,
+        id: this.userLobbyId,
         easyToken: this.tokens[0],
         mediumToken: this.tokens[1],
         hardToken: this.tokens[2],
+        date: date.toISOString(),
         requestURL: "amount=10&category=9&type=multiple"
       };
       const response = await fetch('/quizApi/Lobbies', {
@@ -140,6 +154,10 @@ export default {
   async fetch() {
     this.lobbyInfo = await fetch(`/quizApi/Lobbies/${this.userLobbyId}`).then((res) => res.json());
     console.info(JSON.stringify(this.lobbyInfo));
+    document.getElementById("lobbyCode").innerHTML = this.userLobbyId;
+    document.getElementById("userNickname").innerHTML = this.nickname;
+    this.refreshLeaderboard();
+    this.getQsTokens();
   },
 }
 
