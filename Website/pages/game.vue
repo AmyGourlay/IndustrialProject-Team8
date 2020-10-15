@@ -94,8 +94,8 @@ export default {
         currQuestion: 1,
         currQuestionJSON: null,
         userLobbyId: 90909090,
-        nickname: "xXx_tr1v1a_G0d_xXx",
-        score: 3000,
+        nickname: "felicia",
+        score: 2300,
         tableColumns: [
             {
                 field: 'name',
@@ -125,21 +125,45 @@ export default {
       console.info(document.getElementById(buttonId).innerHTML)
       if (document.getElementById(buttonId).innerHTML == this.currQuestionJSON.correct_answer) {
         alert("Correct answer! ✔");
-        this.updatePlayerScore(500);
+        this.updatePlayerScoreAndPos(500);
       }
       else {
         alert("Wrong answer! ❌");
-        this.updatePlayerScore(-500);
+        this.updatePlayerScoreAndPos(-500);
       }
       this.getNextQuestion();
     },
-    updatePlayerScore(adjustment) {
+    updatePlayerScoreAndPos(adjustment) {
       this.score += adjustment;
       document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;
-      refreshLeaderboard();
+      this.refreshLeaderboard();
       this.tableData.sort(function (a,b) {
         return b.score - a.score;
-      })
+      });
+      let playerPos = 0;
+      for (playerPos=0; playerPos < this.tableData.length; playerPos++) {
+        console.info("in player loop!");
+        if (this.tableData[playerPos].name === this.nickname) {
+            break;
+        }
+      }
+      playerPos++;
+      let positionElem = document.getElementById("playerPosition");
+      console.info(playerPos);
+      switch (playerPos) {
+        case 1:
+          positionElem.innerHTML = "1st";
+          break;
+        case 2:
+          positionElem.innerHTML = "2nd";
+          break;
+        case 3:
+          positionElem.innerHTML = "3rd";
+          break;
+        default:
+          positionElem.innerHTML = `${playerPos}th`;
+          break;
+      }
       // TODO: Update the player score in the database HERE
     },
     getNextQuestion() {
