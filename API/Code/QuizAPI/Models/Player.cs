@@ -12,5 +12,7 @@ namespace QuizAPI.Models
 		public int score { get; set; }
 		public int lobbyId { get; set; }
 		public int questionIndex { get; set; }
+		public bool lifeline5050 { get; set; }
+		public bool lifelineSkip { get; set; }
 	}
 }
