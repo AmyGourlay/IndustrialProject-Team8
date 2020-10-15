@@ -47,8 +47,8 @@ namespace QuizAPI.Controllers
             List<Lobby> lobbies = new List<Lobby>();
             Lobby tmp;
 
-			while(data.Read())
-			{
+            while(data.Read())
+            {
                 tmp = new Lobby();
                 tmp.id = data.GetInt32(0);
                 tmp.easyToken = data.GetString(1);
@@ -138,8 +138,8 @@ namespace QuizAPI.Controllers
 
             connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             cmd = new SqlCommand("UPDATE lobby " +
-                                            "SET easyToken = '" + lobby.easyToken + 
-                                            "', mediumToken = '" + lobby.mediumToken + 
+                                            "SET easyToken = '" + lobby.easyToken +
+                                            "', mediumToken = '" + lobby.mediumToken +
                                             "', hardToken = '" + lobby.hardToken +
                                             "', requestURL = '" + lobby.requestURL +
                                             "', date = '" + lobby.date +
@@ -162,18 +162,34 @@ namespace QuizAPI.Controllers
         {
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("INSERT INTO lobby(Id, easyToken, mediumToken, hardToken, requestURL, date) " +
-                                            "VALUES(" + lobby.id + ", '" + lobby.easyToken + "', '" + lobby.mediumToken + "', '" + lobby.hardToken + "', '" + lobby.requestURL + "', '" + lobby.date + "');", cnn);
 
+            Random rnd = new Random();
+            lobby.id = rnd.Next(10000000, 99999999);
+
+            SqlCommand cmd = new SqlCommand("SELECT * FROM lobby WHERE Id=" + lobby.id + ";", cnn);
             cnn.Open();
+            SqlDataReader data = cmd.ExecuteReader();
+
+            while (data.HasRows == true)
+            {
+                lobby.id = rnd.Next(10000000, 99999999);
+                cmd.Dispose();
+                cmd = new SqlCommand("SELECT * FROM lobby WHERE Id=" + lobby.id + ";", cnn);
+                data = cmd.ExecuteReader();
+            }
+
+            data.Close();
+            cmd.Dispose();
+
+            cmd = new SqlCommand("INSERT INTO lobby(Id, easyToken, mediumToken, hardToken, requestURL, date) " +
+                                 "VALUES(" + lobby.id + ", '" + lobby.easyToken + "', '" + lobby.mediumToken + "', '" + lobby.hardToken + "', '" + lobby.requestURL + "', '" + lobby.date + "');", cnn);
+
             cmd.ExecuteNonQuery();
             cmd.Dispose();
             cnn.Close();
 
             return CreatedAtAction("GetLobby", new { id = lobby.id }, lobby);
         }
-
-
 
         ////**** DELETE ****////
         // DELETE: api/Lobbies/[id]
