@@ -18,9 +18,11 @@ namespace QuizAPI.Controllers
             _context = context;
         }
 
+        ////**** GET ****////
         // GET: api/Players
+        // READ ALL
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Player>>> GetLobbyItems()
+        public async Task<ActionResult<IEnumerable<Player>>> GetPlayerItems()
         {
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
@@ -59,7 +61,8 @@ namespace QuizAPI.Controllers
             return players;
         }
 
-        // GET: api/Players/5
+        // GET: api/Players/[id]
+        // READ
         [HttpGet("{id}")]
         public async Task<ActionResult<Player>> GetPlayer(int id)
         {
@@ -78,7 +81,7 @@ namespace QuizAPI.Controllers
                 return NotFound();
             }
 
-            //create lobby object
+            //create player list
             Player player = new Player();
 
             data.Read();
@@ -94,9 +97,53 @@ namespace QuizAPI.Controllers
             return player;
         }
 
-        // PUT: api/Players/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        // GET: api/Players/inlobby/[id]
+        // READ
+        [HttpGet("inlobby/{lobbyId}")]
+        public async Task<ActionResult<IEnumerable<Player>>> GetPlayersInLobby(int lobbyId)
+        {
+            string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
+            SqlConnection cnn = new SqlConnection(connetionString);
+            SqlCommand cmd = new SqlCommand("SELECT * FROM player WHERE lobbyId=" + lobbyId + ";", cnn);
+
+            cnn.Open();
+            SqlDataReader data = cmd.ExecuteReader();
+
+            if(data.HasRows == false)
+            {
+                data.Close();
+                cmd.Dispose();
+                cnn.Close();
+                return NotFound("Tried GetPlayersInLobby() with id " + lobbyId);
+            }
+
+            //create player list
+            List<Player> players = new List<Player>();
+            Player tmp;
+
+            while(data.Read())
+            {
+                tmp = new Player();
+                tmp.id = data.GetInt32(0);
+                tmp.name = data.GetString(1);
+                tmp.score = data.GetInt32(2);
+                tmp.lobbyId = data.GetInt32(3);
+
+                players.Add(tmp);
+            }
+
+            data.Close();
+            cmd.Dispose();
+            cnn.Close();
+
+            return players;
+        }
+
+
+
+        ////**** PUT ****////
+        // PUT: api/Players/[id]
+        // UPDATE
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPlayer(int id, Player player)
         {
@@ -137,9 +184,11 @@ namespace QuizAPI.Controllers
             return NoContent();
         }
 
+
+
+        ////**** POST ****////
         // POST: api/Players
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        // INSERT
         [HttpPost]
         public async Task<ActionResult<Player>> PostPlayer(Player player)
         {
@@ -156,7 +205,11 @@ namespace QuizAPI.Controllers
             return CreatedAtAction("GetPlayer", new { id = player.id }, player);
         }
 
-        // DELETE: api/Players/5
+
+
+        ////**** DELETE ****////
+        // DELETE: api/Players/[id]
+        // DELETE
         [HttpDelete("{id}")]
         public async Task<ActionResult<Player>> DeletePlayer(int id)
         {
