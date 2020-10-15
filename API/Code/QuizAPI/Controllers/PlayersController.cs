@@ -50,6 +50,7 @@ namespace QuizAPI.Controllers
                 tmp.name = data.GetString(1);
                 tmp.score = data.GetInt32(2);
                 tmp.lobbyId = data.GetInt32(3);
+                tmp.questionIndex = data.GetInt32(4);
 
                 players.Add(tmp);
             }
@@ -89,6 +90,7 @@ namespace QuizAPI.Controllers
             player.name = data.GetString(1);
             player.score = data.GetInt32(2);
             player.lobbyId = data.GetInt32(3);
+            player.questionIndex = data.GetInt32(4);
 
             data.Close();
             cmd.Dispose();
@@ -128,6 +130,7 @@ namespace QuizAPI.Controllers
                 tmp.name = data.GetString(1);
                 tmp.score = data.GetInt32(2);
                 tmp.lobbyId = data.GetInt32(3);
+                tmp.questionIndex = data.GetInt32(3);
 
                 players.Add(tmp);
             }
@@ -175,6 +178,7 @@ namespace QuizAPI.Controllers
                                             "SET PlayerName = '" + player.name +
                                             "', Score = " + player.score +
                                             ", lobbyId = " + player.lobbyId +
+                                            ", questionIndex = " + player.questionIndex +
                                             " WHERE id = " + id + ";", cnn);
 
             cmd.ExecuteNonQuery();
@@ -194,8 +198,8 @@ namespace QuizAPI.Controllers
         {
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("INSERT INTO player(id, PlayerName, Score, lobbyId) " +
-                                            "VALUES(" + player.id + ", '" + player.name + "', "  + player.score + ", " + player.lobbyId + ");", cnn);
+            SqlCommand cmd = new SqlCommand("INSERT INTO player(PlayerName, Score, lobbyId, questionIndex) " +
+                                            "VALUES(" player.name + "', "  + player.score + ", " + player.lobbyId + ", " + player.questionIndex + ");", cnn);
 
             cnn.Open();
             cmd.ExecuteNonQuery();

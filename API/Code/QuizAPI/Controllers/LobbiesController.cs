@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlTypes;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +22,9 @@ namespace QuizAPI.Controllers
             _context = context;
         }
 
+        ////**** GET ****////
         // GET: api/Lobbies
+        // READ ALL
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Lobby>>> GetLobbyItems()
         {
@@ -37,7 +43,7 @@ namespace QuizAPI.Controllers
                 return NotFound();
             }
 
-            //create lobby object
+            //create lobby list
             List<Lobby> lobbies = new List<Lobby>();
             Lobby tmp;
 
@@ -49,6 +55,7 @@ namespace QuizAPI.Controllers
                 tmp.mediumToken = data.GetString(2);
                 tmp.hardToken = data.GetString(3);
                 tmp.requestURL = data.GetString(4);
+                tmp.date = data.GetDateTime(5).ToString();
 
                 lobbies.Add(tmp);
             }
@@ -60,7 +67,8 @@ namespace QuizAPI.Controllers
             return lobbies;
         }
 
-        // GET: api/Lobbies/5
+        // GET: api/Lobbies/[id]
+        // READ
         [HttpGet("{id}")]
         public async Task<ActionResult<Lobby>> GetLobby(int id)
         {
@@ -88,6 +96,7 @@ namespace QuizAPI.Controllers
             lobby.mediumToken = data.GetString(2);
             lobby.hardToken = data.GetString(3);
             lobby.requestURL = data.GetString(4);
+            lobby.date = data.GetDateTime(5).ToString();
 
             data.Close();
             cmd.Dispose();
@@ -96,9 +105,11 @@ namespace QuizAPI.Controllers
             return lobby;
         }
 
-        // PUT: api/Lobbies/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+
+
+        ////**** PUT ****////
+        // PUT: api/Lobbies/[id]
+        // UPDATE
         [HttpPut("{id}")]
         public async Task<IActionResult> PutLobby(int id, Lobby lobby)
         {
@@ -130,8 +141,9 @@ namespace QuizAPI.Controllers
                                             "SET easyToken = '" + lobby.easyToken + 
                                             "', mediumToken = '" + lobby.mediumToken + 
                                             "', hardToken = '" + lobby.hardToken +
-                                            "', requestURL = '" + lobby.requestURL + "' " +
-                                            "WHERE Id = " + id + ";", cnn);
+                                            "', requestURL = '" + lobby.requestURL +
+                                            "', date = '" + lobby.date +
+                                            "' WHERE Id = " + id + ";", cnn);
 
             cmd.ExecuteNonQuery();
             cmd.Dispose();
@@ -140,16 +152,18 @@ namespace QuizAPI.Controllers
             return NoContent();
         }
 
+
+
+        ////**** POST ****////
         // POST: api/Lobbies
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        // INSERT
         [HttpPost]
         public async Task<ActionResult<Lobby>> PostLobby(Lobby lobby)
         {
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("INSERT INTO lobby(Id, easyToken, mediumToken, hardToken, requestURL) " +
-                                            "VALUES(" + lobby.id + ", '" + lobby.easyToken + "', '" + lobby.mediumToken + "', '" + lobby.hardToken + "', '" + lobby.requestURL + "');", cnn);
+            SqlCommand cmd = new SqlCommand("INSERT INTO lobby(Id, easyToken, mediumToken, hardToken, requestURL, date) " +
+                                            "VALUES(" + lobby.id + ", '" + lobby.easyToken + "', '" + lobby.mediumToken + "', '" + lobby.hardToken + "', '" + lobby.requestURL + "', '" + lobby.date + "');", cnn);
 
             cnn.Open();
             cmd.ExecuteNonQuery();
@@ -159,7 +173,10 @@ namespace QuizAPI.Controllers
             return CreatedAtAction("GetLobby", new { id = lobby.id }, lobby);
         }
 
-        // DELETE: api/Lobbies/5
+
+
+        ////**** DELETE ****////
+        // DELETE: api/Lobbies/[id]
         [HttpDelete("{id}")]
         public async Task<ActionResult<Lobby>> DeleteLobby(int id)
         {

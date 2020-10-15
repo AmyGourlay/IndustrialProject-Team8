@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,5 +13,6 @@ namespace QuizAPI.Models
 		public string mediumToken { get; set; }
 		public string hardToken { get; set; }
 		public string requestURL { get; set; }
+		public string date { get; set; }
 	}
 }
