@@ -221,7 +221,7 @@ namespace QuizAPI.Controllers
         {
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("SELECT id FROM player WHERE playerName = '" + curPlayer.name + "' AND lobbyId = " + curPlayer.lobbyId, cnn);
+            SqlCommand cmd = new SqlCommand("SELECT * FROM player WHERE playerName = '" + curPlayer.name + "' AND lobbyId = " + curPlayer.lobbyId, cnn);
 
             cnn.Open();
             SqlDataReader data = cmd.ExecuteReader();
@@ -237,15 +237,14 @@ namespace QuizAPI.Controllers
             data.Close();
             cmd.Dispose();
 
-            connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             cmd = new SqlCommand("UPDATE player " +
                                             "SET playerName = '" + curPlayer.name +
                                             "', score = " + curPlayer.score +
                                             ", lobbyId = " + curPlayer.lobbyId +
                                             ", questionIndex = " + curPlayer.questionIndex +
-                                            ", lifeline5050 = " + curPlayer.lifeline5050 +
-                                            ", lifelineSkip = " + curPlayer.lifelineSkip +
-                                            " WHERE playerName = '" + curPlayer.name +
+                                            ", lifeline5050 = '" + curPlayer.lifeline5050 +
+                                            "', lifelineSkip = '" + curPlayer.lifelineSkip +
+                                            "' WHERE playerName = '" + curPlayer.name +
                                             "' AND lobbyId = " + curPlayer.lobbyId, cnn);
 
             cmd.ExecuteNonQuery();
@@ -263,7 +262,7 @@ namespace QuizAPI.Controllers
             //Check of the record exists
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("SELECT id FROM player WHERE playerName = '" + curPlayer.name + "' AND lobbyId = " + curPlayer.lobbyId, cnn);
+            SqlCommand cmd = new SqlCommand("SELECT * FROM player WHERE playerName = '" + curPlayer.name + "' AND lobbyId = " + curPlayer.lobbyId, cnn);
 
             cnn.Open();
             SqlDataReader data = cmd.ExecuteReader();
@@ -283,7 +282,7 @@ namespace QuizAPI.Controllers
             connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8 ;Password=b7zYDzhJ;";
             cmd = new SqlCommand("UPDATE player + SET lifeline5050 = '" + curPlayer.lifeline5050.ToString() +
                                             "', lifelineSkip = '" + curPlayer.lifelineSkip.ToString() +
-                                            "WHERE playerName = '" + curPlayer.name + "' AND lobbyId = " + curPlayer.lobbyId, cnn);
+                                            "' WHERE playerName = '" + curPlayer.name + "' AND lobbyId = " + curPlayer.lobbyId, cnn);
 
             cmd.ExecuteNonQuery();
             cmd.Dispose();
@@ -309,7 +308,7 @@ namespace QuizAPI.Controllers
             cmd.ExecuteNonQuery();
             cmd.Dispose();
 
-            cmd = new SqlCommand("SELECT id FROM player WHERE playerName = '" + player.name + "' AND lobbyId = " + player.lobbyId + ";", cnn);
+            cmd = new SqlCommand("SELECT * FROM player WHERE playerName = '" + player.name + "' AND lobbyId = " + player.lobbyId + ";", cnn);
 
             SqlDataReader data = cmd.ExecuteReader();
             data.Read();
@@ -332,7 +331,7 @@ namespace QuizAPI.Controllers
         {
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("SELECT id FROM player WHERE playerName = '" + curPlayer.name + "' AND lobbyId = " + curPlayer.lobbyId, cnn);
+            SqlCommand cmd = new SqlCommand("SELECT * FROM player WHERE playerName = '" + curPlayer.name + "' AND lobbyId = " + curPlayer.lobbyId, cnn);
 
             cnn.Open();
             SqlDataReader data = cmd.ExecuteReader();
