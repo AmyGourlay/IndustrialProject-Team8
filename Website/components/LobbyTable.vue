@@ -52,13 +52,13 @@
         async fetch() {
           this.info = await fetch(`/quizApi/Players`)
             .then((res) => res.json())
-          console.log(info);
+          console.log(this.info);
         }
     }
     /*export default {
         data() {
             return {
-                
+
                 data: [
                     { 'id': 1, 'nickname': 'Jesse'},
                     { 'id': 2, 'nickname': 'John'},
@@ -99,7 +99,7 @@
     color: white !important;
     background-color: black;
     position: sticky;
-    top: 0; 
+    top: 0;
     z-index:999;
     padding: 20px;
 }

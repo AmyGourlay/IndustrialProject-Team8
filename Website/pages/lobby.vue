@@ -1,10 +1,13 @@
 <template>
-    
-  
+
+
     <section class="section is-fullheight">
       <div class="column is-mobile is-centered">
+          <b-button type="is-primary" @click="createLobby">
+            <b-icon class="icon" pack="mdi" icon="refresh">
+            </b-icon>
+          </b-button>
           <LobbyCodeLbl title="Lobby Code Goes Here (ಥ﹏ಥ)"></LobbyCodeLbl>
-          <h1>{{lobbyCode}}</h1>
       </div>
       <div class="column is-mobile is-centered">
         <LobbyTable></LobbyTable>
@@ -18,33 +21,47 @@
         </div>
       </div>
     </section>
-  
- 
+
+
 </template>
 
 <script>
-import Card from '~/components/Card'
-import BlackButton from '~/components/BlackButton'
-import LobbyTable from '~/components/LobbyTable'
-import LobbyCodeLbl from '~/components/LobbyCodeLbl'
-import router from 'router'
+import Card from '~/components/Card';
+import BlackButton from '~/components/BlackButton';
+import LobbyTable from '~/components/LobbyTable';
+import LobbyCodeLbl from '~/components/LobbyCodeLbl';
 export default {
+
   name: 'lobby',
   components: {
-    Card,
-    Button
+    Card
   },
   data() {
     return {
-      lobbyInfo: [],
-      lobbyCode: []
+      lobbyInfo: []
     }
   },
-    
-  async fetch() {
-      this.lobbyInfo = await fetch(`/quizApi/Lobbies/${this.userLobbyId}`).then((res) => res.json());
-      console.info(JSON.stringify(this.lobbyInfo));
-      document.getElementById("lobbyCode").innerHTML = this.userLobbyId;
-      //document.getElementById("userNickname").innerHTML = this.nickname;
-  } 
+  methods: {
+    async createLobby() {
+      console.info("In lobby vue!");
+      const date = new Date();
+      const newLobby = {
+        easyQs: "",
+        mediumQs: "",
+        hardQs: "",
+        date: date.toISOString(),
+        requestURL: "amount=10&category=9&type=multiple&encode=base64"
+      };
+      this.lobbyInfo = await fetch('/quizApi/Lobbies', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(newLobby)
+      }).then((res) => res.json());
+      console.info(this.lobbyInfo);
+      document.getElementById("lobbyCode").innerHTML = this.lobbyInfo.id;
+    }
+  }
 }
+</script>

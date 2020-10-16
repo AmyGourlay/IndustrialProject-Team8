@@ -12,10 +12,10 @@
   "dependencies": {
     "@nuxt/http": "^0.6.0",
     "@nuxtjs/proxy": "^2.0.1",
+    "buefy": "^0.9.3",
     "core-js": "^3.6.5",
     "fs": "0.0.1-security",
     "net": "^1.0.2",
-    "node": "^14.13.1",
     "node-sass": "^4.14.1",
     "nuxt": "^2.14.7",
     "nuxt-buefy": "^0.4.3",
