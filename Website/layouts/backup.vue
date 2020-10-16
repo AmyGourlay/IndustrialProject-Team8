@@ -49,16 +49,3 @@ export default {
   }
 }
 </script>
-
-<style>
-.panel-heading
-{
-  text-align: center;
-  
-}
-.is-primary.is-active.input 
-{
-  text-align: center;
-}
-
-</style>
