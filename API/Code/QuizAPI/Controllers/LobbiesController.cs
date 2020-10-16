@@ -120,7 +120,7 @@ namespace QuizAPI.Controllers
 
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("SELECT * FROM player WHERE id=" + id + ";", cnn);
+            SqlCommand cmd = new SqlCommand("SELECT * FROM lobby WHERE id=" + id + ";", cnn);
 
             cnn.Open();
             SqlDataReader data = cmd.ExecuteReader();
