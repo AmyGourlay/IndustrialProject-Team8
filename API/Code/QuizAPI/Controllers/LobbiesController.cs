@@ -51,9 +51,9 @@ namespace QuizAPI.Controllers
             {
                 tmp = new Lobby();
                 tmp.id = data.GetInt32(0);
-                tmp.easyToken = data.GetString(1);
-                tmp.mediumToken = data.GetString(2);
-                tmp.hardToken = data.GetString(3);
+                tmp.easyQuestions = data.GetString(1);
+                tmp.mediumQuestions = data.GetString(2);
+                tmp.hardQuestions = data.GetString(3);
                 tmp.requestURL = data.GetString(4);
                 tmp.date = data.GetDateTime(5).ToString();
 
@@ -74,7 +74,7 @@ namespace QuizAPI.Controllers
         {
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("SELECT * FROM lobby WHERE Id="+id+";", cnn);
+            SqlCommand cmd = new SqlCommand("SELECT * FROM lobby WHERE id="+id+";", cnn);
 
             cnn.Open();
             SqlDataReader data = cmd.ExecuteReader();
@@ -92,9 +92,9 @@ namespace QuizAPI.Controllers
 
             data.Read();
             lobby.id = data.GetInt32(0);
-            lobby.easyToken = data.GetString(1);
-            lobby.mediumToken = data.GetString(2);
-            lobby.hardToken = data.GetString(3);
+            lobby.easyQuestions = data.GetString(1);
+            lobby.mediumQuestions = data.GetString(2);
+            lobby.hardQuestions = data.GetString(3);
             lobby.requestURL = data.GetString(4);
             lobby.date = data.GetDateTime(5).ToString();
 
@@ -138,9 +138,9 @@ namespace QuizAPI.Controllers
 
             connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             cmd = new SqlCommand("UPDATE lobby " +
-                                            "SET easyToken = '" + lobby.easyToken +
-                                            "', mediumToken = '" + lobby.mediumToken +
-                                            "', hardToken = '" + lobby.hardToken +
+                                            "SET easyQuestions = '" + lobby.easyQuestions +
+                                            "', mediumQuestions = '" + lobby.mediumQuestions +
+                                            "', hardQuestions = '" + lobby.hardQuestions +
                                             "', requestURL = '" + lobby.requestURL +
                                             "', date = '" + lobby.date +
                                             "' WHERE Id = " + id + ";", cnn);
@@ -166,7 +166,7 @@ namespace QuizAPI.Controllers
             Random rnd = new Random();
             lobby.id = rnd.Next(10000000, 99999999);
 
-            SqlCommand cmd = new SqlCommand("SELECT * FROM lobby WHERE Id=" + lobby.id + ";", cnn);
+            SqlCommand cmd = new SqlCommand("SELECT * FROM lobby WHERE id=" + lobby.id + ";", cnn);
             cnn.Open();
             SqlDataReader data = cmd.ExecuteReader();
 
@@ -174,15 +174,15 @@ namespace QuizAPI.Controllers
             {
                 lobby.id = rnd.Next(10000000, 99999999);
                 cmd.Dispose();
-                cmd = new SqlCommand("SELECT * FROM lobby WHERE Id=" + lobby.id + ";", cnn);
+                cmd = new SqlCommand("SELECT * FROM lobby WHERE id=" + lobby.id + ";", cnn);
                 data = cmd.ExecuteReader();
             }
 
             data.Close();
             cmd.Dispose();
 
-            cmd = new SqlCommand("INSERT INTO lobby(Id, easyToken, mediumToken, hardToken, requestURL, date) " +
-                                 "VALUES(" + lobby.id + ", '" + lobby.easyToken + "', '" + lobby.mediumToken + "', '" + lobby.hardToken + "', '" + lobby.requestURL + "', '" + lobby.date + "');", cnn);
+            cmd = new SqlCommand("INSERT INTO lobby(id, easyQuestions, mediumQuestions, hardQuestions, requestURL, date) " +
+                                 "VALUES(" + lobby.id + ", '" + lobby.easyQuestions + "', '" + lobby.mediumQuestions + "', '" + lobby.hardQuestions + "', '" + lobby.requestURL + "', '" + lobby.date + "');", cnn);
 
             cmd.ExecuteNonQuery();
             cmd.Dispose();
@@ -198,7 +198,7 @@ namespace QuizAPI.Controllers
         {
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("SELECT Id FROM lobby WHERE Id=" + id + ";", cnn);
+            SqlCommand cmd = new SqlCommand("SELECT Id FROM lobby WHERE id=" + id + ";", cnn);
 
             cnn.Open();
             SqlDataReader data = cmd.ExecuteReader();
@@ -214,7 +214,7 @@ namespace QuizAPI.Controllers
             data.Close();
             cmd.Dispose();
 
-            cmd = new SqlCommand("DELETE FROM lobby WHERE Id = " + id + ";", cnn);
+            cmd = new SqlCommand("DELETE FROM lobby WHERE id = " + id + ";", cnn);
             cmd.ExecuteNonQuery();
 
             cmd.Dispose();
