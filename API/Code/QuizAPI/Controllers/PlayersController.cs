@@ -64,14 +64,17 @@ namespace QuizAPI.Controllers
             return players;
         }
 
-        // GET: api/Players/[id]
+        // GET: api/Players/getinfo
         // READ
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Player>> GetPlayer(int id)
+        [HttpGet("getinfo")]
+        public async Task<ActionResult<Player>> GetPlayer(Player curPlayer)
         {
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("SELECT * FROM player WHERE id=" + id + ";", cnn);
+            SqlCommand cmd = new SqlCommand("SELECT * FROM player WHERE playerName = '" + curPlayer.name + "' AND lobbyId = " + curPlayer.lobbyId, cnn);
+            //SqlCommand cmd = new SqlCommand("SELECT * FROM player WHERE playerName = '@name' AND lobbyId = @lobbyId", cnn);
+            //cmd.Parameters.AddWithValue("@name", curPlayer.name);
+            //cmd.Parameters.AddWithValue("@lobbyId", curPlayer.lobbyId);
 
             cnn.Open();
             SqlDataReader data = cmd.ExecuteReader();
@@ -81,7 +84,7 @@ namespace QuizAPI.Controllers
                 data.Close();
                 cmd.Dispose();
                 cnn.Close();
-                return NotFound();
+                return NotFound(curPlayer.name + " " + curPlayer.lobbyId);
             }
 
             //create player list
@@ -148,14 +151,14 @@ namespace QuizAPI.Controllers
             return players;
         }
 
-        // GET: api/Players/lifeline5050/[id]
+        // GET: api/Players/lifeline5050
         // READ LIFELINE5050
-        [HttpGet("lifeline5050/{id}")]
-        public async Task<ActionResult<bool>> GetPlayerLifeline5050(int id)
+        [HttpGet("lifeline5050")]
+        public async Task<ActionResult<bool>> GetPlayerLifeline5050(Player curPlayer)
         {
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("SELECT lifeline5050 FROM player WHERE id=" + id + ";", cnn);
+            SqlCommand cmd = new SqlCommand("SELECT lifeline5050 FROM player WHERE playerName = '" + curPlayer.name + "' AND lobbyId = " + curPlayer.lobbyId, cnn);
 
             cnn.Open();
             SqlDataReader data = cmd.ExecuteReader();
@@ -165,7 +168,7 @@ namespace QuizAPI.Controllers
                 data.Close();
                 cmd.Dispose();
                 cnn.Close();
-                return NotFound("Tried GetPlayerLifeline5050() with id " + id);
+                return NotFound("Could not find any information regarding GetPlayerLifeline5050() with name " + curPlayer.name + " and lobbyID " + curPlayer.lobbyId);
             }
 
             data.Read();
@@ -178,14 +181,14 @@ namespace QuizAPI.Controllers
             return result;
         }
 
-        // GET: api/Players/lifelineSkip/[id]
+        // GET: api/Players/lifelineSkip
         // READ LIFELINESKIP
-        [HttpGet("lifelineSkip/{id}")]
-        public async Task<ActionResult<bool>> GetPlayerLifelineSkip(int id)
+        [HttpGet("lifelineSkip")]
+        public async Task<ActionResult<bool>> GetPlayerLifelineSkip(Player curPlayer)
         {
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("SELECT lifelineSkip FROM player WHERE id=" + id + ";", cnn);
+            SqlCommand cmd = new SqlCommand("SELECT lifelineSkip FROM player WHERE playerName = '" + curPlayer.name + "' AND lobbyId = " + curPlayer.lobbyId, cnn);
 
             cnn.Open();
             SqlDataReader data = cmd.ExecuteReader();
@@ -195,7 +198,7 @@ namespace QuizAPI.Controllers
                 data.Close();
                 cmd.Dispose();
                 cnn.Close();
-                return NotFound("Tried GetPlayerLifelineSkip() with id " + id);
+                return NotFound("Could not find any information regarding GetPlayerLifelineSkip() with name " + curPlayer.name + "and lobbyID " + curPlayer.lobbyId);
             }
 
             data.Read();
@@ -211,19 +214,14 @@ namespace QuizAPI.Controllers
 
 
         ////**** PUT ****////
-        // PUT: api/Players/[id]
+        // PUT: api/Players
         // UPDATE
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPlayer(int id, Player player)
+        [HttpPut]
+        public async Task<IActionResult> PutPlayer(Player curPlayer)
         {
-            if(id != player.id)
-            {
-                return BadRequest();
-            }
-
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("SELECT * FROM player WHERE id=" + id + ";", cnn);
+            SqlCommand cmd = new SqlCommand("SELECT id FROM player WHERE playerName = '" + curPlayer.name + "' AND lobbyId = " + curPlayer.lobbyId, cnn);
 
             cnn.Open();
             SqlDataReader data = cmd.ExecuteReader();
@@ -241,13 +239,14 @@ namespace QuizAPI.Controllers
 
             connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             cmd = new SqlCommand("UPDATE player " +
-                                            "SET playerName = '" + player.name +
-                                            "', score = " + player.score +
-                                            ", lobbyId = " + player.lobbyId +
-                                            ", questionIndex = " + player.questionIndex +
-                                            ", lifeline5050 = " + player.lifeline5050 +
-                                            ", lifelineSkip = " + player.lifelineSkip +
-                                            " WHERE id = " + id + ";", cnn);
+                                            "SET playerName = '" + curPlayer.name +
+                                            "', score = " + curPlayer.score +
+                                            ", lobbyId = " + curPlayer.lobbyId +
+                                            ", questionIndex = " + curPlayer.questionIndex +
+                                            ", lifeline5050 = " + curPlayer.lifeline5050 +
+                                            ", lifelineSkip = " + curPlayer.lifelineSkip +
+                                            " WHERE playerName = '" + curPlayer.name +
+                                            "' AND lobbyId = " + curPlayer.lobbyId, cnn);
 
             cmd.ExecuteNonQuery();
             cmd.Dispose();
@@ -256,15 +255,15 @@ namespace QuizAPI.Controllers
             return NoContent();
         }
 
-        // PUT: api/Players/lifelines/[id]
+        // PUT: api/Players/lifelines
         // UPDATE LIFELINES
-        [HttpPut("lifelines/{id}")]
-        public async Task<IActionResult> PutLifeline(int id, Player player)
+        [HttpPut("lifelines")]
+        public async Task<IActionResult> PutLifeline(Player curPlayer)
         {
             //Check of the record exists
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("SELECT * FROM player WHERE id=" + id + ";", cnn);
+            SqlCommand cmd = new SqlCommand("SELECT id FROM player WHERE playerName = '" + curPlayer.name + "' AND lobbyId = " + curPlayer.lobbyId, cnn);
 
             cnn.Open();
             SqlDataReader data = cmd.ExecuteReader();
@@ -282,9 +281,9 @@ namespace QuizAPI.Controllers
 
             //Update the lifeline
             connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8 ;Password=b7zYDzhJ;";
-            cmd = new SqlCommand("UPDATE player SET lifeline5050 = '" + player.lifeline5050.ToString() +
-                                            "', lifelineSkip = '" + player.lifelineSkip.ToString() +
-                                            "' WHERE id = " + id + ";", cnn);
+            cmd = new SqlCommand("UPDATE player + SET lifeline5050 = '" + curPlayer.lifeline5050.ToString() +
+                                            "', lifelineSkip = '" + curPlayer.lifelineSkip.ToString() +
+                                            "WHERE playerName = '" + curPlayer.name + "' AND lobbyId = " + curPlayer.lobbyId, cnn);
 
             cmd.ExecuteNonQuery();
             cmd.Dispose();
@@ -326,14 +325,14 @@ namespace QuizAPI.Controllers
 
 
         ////**** DELETE ****////
-        // DELETE: api/Players/[id]
+        // DELETE: api/Players
         // DELETE
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<Player>> DeletePlayer(int id)
+        [HttpDelete]
+        public async Task<ActionResult<Player>> DeletePlayer(Player curPlayer)
         {
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("SELECT id FROM player WHERE id=" + id + ";", cnn);
+            SqlCommand cmd = new SqlCommand("SELECT id FROM player WHERE playerName = '" + curPlayer.name + "' AND lobbyId = " + curPlayer.lobbyId, cnn);
 
             cnn.Open();
             SqlDataReader data = cmd.ExecuteReader();
@@ -349,7 +348,7 @@ namespace QuizAPI.Controllers
             data.Close();
             cmd.Dispose();
 
-            cmd = new SqlCommand("DELETE FROM player WHERE id = " + id + ";", cnn);
+            cmd = new SqlCommand("DELETE FROM player WHERE playerName = '" + curPlayer.name + "' AND lobbyId = " + curPlayer.lobbyId, cnn);
             cmd.ExecuteNonQuery();
 
             cmd.Dispose();
