@@ -155,6 +155,12 @@ export default {
       this.getNextQuestion();
     },
     async updateLobbyTable() {
+      let tempLobbyInfo = {
+        id: this.lobbyInfo.id,
+        easyQuestions: JSON.stringify(this.lobbyInfo.easyQuestions),
+        mediumQuestions: JSON.stringify(this.lobbyInfo.mediumQuestions),
+        hardQuestions: JSON.stringify(this.lobbyInfo.hardQuestions),
+      };
       const response = await fetch(`/quizApi/Lobbies/${this.lobbyInfo.id}`, {
         method: 'PUT',
         headers: {
@@ -162,6 +168,7 @@ export default {
         },
         body: JSON.stringify(this.lobbyInfo)
       }).then((res) => res.json());
+      console.info("IN UPDATE LOBBY");
       console.info(response);
     },
     async updatePlayerTable(){
@@ -227,14 +234,11 @@ export default {
     async getQs() {
       this.lobbyInfo = await fetch(`/quizApi/Lobbies/${this.lobbyInfo.id}`).then((res) => res.json());
       console.info("IN HERE");
-      if (this.lobbyInfo.easyQuestions === "") { // checks the DB lobby data to see if questions have already been generated, if not, it generates them
+      if (this.lobbyInfo.easyQuestions === "" || this.lobbyInfo.mediumQuestions === "" || this.lobbyInfo.hardQuestions === "") { // checks the DB lobby data to see if questions have already been generated, if not, it generates them
         this.lobbyInfo.easyQuestions = await fetch(`/getQuestions/amount=10&category=9&difficulty=easy&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
-      }
-      if (this.lobbyInfo.mediumQuestions === "") {
         this.lobbyInfo.mediumQuestions = await fetch(`/getQuestions/amount=10&category=9&difficulty=medium&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
-      }
-      if (this.lobbyInfo.hardQuestions === "") {
         this.lobbyInfo.hardQuestions = await fetch(`/getQuestions/amount=10&category=9&difficulty=hard&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
+        this.updateLobbyTable();
       }
       /*this.easyQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=easy&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
       this.mediumQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=medium&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results);
