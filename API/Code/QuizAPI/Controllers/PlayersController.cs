@@ -66,7 +66,7 @@ namespace QuizAPI.Controllers
 
         // GET: api/Players/getinfo
         // READ
-        [HttpGet("{getinfo}")]
+        [HttpGet("getinfo")]
         public async Task<ActionResult<Player>> GetPlayer(Player curPlayer)
         {
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
@@ -264,7 +264,7 @@ namespace QuizAPI.Controllers
         // PUT: api/Players/lifelines
         // UPDATE LIFELINES
         [HttpPut("lifelines")]
-        public async Task<IActionResult> PutLifeline(int id, Player curPlayer)
+        public async Task<IActionResult> PutLifeline(Player curPlayer)
         {
             //Check of the record exists
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
@@ -335,7 +335,7 @@ namespace QuizAPI.Controllers
 
 
         ////**** DELETE ****////
-        // DELETE: api/Players/[id]
+        // DELETE: api/Players
         // DELETE
         [HttpDelete]
         public async Task<ActionResult<Player>> DeletePlayer(Player curPlayer)
