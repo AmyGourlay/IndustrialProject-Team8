@@ -4,7 +4,7 @@
       <div class="tile is-parent is-8">
         <article class="tile is-child box"><!-- QUESTION TILE -->
           <p class="title" id="questionNumber">Question 000</p>
-          <p class="subtitle" id="questionTopic">Topic: ---</p>
+          <p class="subtitle" id="questionTopic">Difficulty: --- <br>Topic: --- <br/></p>
           <div class="content">
             <p class="is-size-3-tablet" id="questionBox"></p>
           </div>
@@ -27,18 +27,18 @@
     </div>
     <div class="tile is-ancestor">
       <div class="tile is-parent is-vertical buttons">
-        <b-button @click="checkAnswer('ansOne')" class="tile is-size-3-tablet is-child field is-grouped is-primary">
+        <b-button @click="checkAnswer('ansOne')" class="tile answerButton is-size-3-tablet is-child field is-grouped is-primary">
           <p class="is-size-3-tablet answerLabel" id="ansOne">----</p>
         </b-button>
-        <b-button @click="checkAnswer('ansTwo')" class="tile is-size-3-tablet is-child field is-grouped is-primary">
+        <b-button @click="checkAnswer('ansTwo')" class="tile answerButton is-size-3-tablet is-child field is-grouped is-primary">
           <p class="is-size-3-tablet answerLabel" id="ansTwo">----</p>
         </b-button>
       </div>
       <div class="tile is-parent is-vertical buttons">
-        <b-button @click="checkAnswer('ansThree')" class="tile is-size-3-tablet is-child field is-grouped is-primary">
+        <b-button @click="checkAnswer('ansThree')" class="tile answerButton is-size-3-tablet is-child field is-grouped is-primary">
           <p class="is-size-3-tablet answerLabel" id="ansThree">----</p>
         </b-button>
-        <b-button @click="checkAnswer('ansFour')" class="tile is-size-3-tablet is-child field is-grouped is-primary">
+        <b-button @click="checkAnswer('ansFour')" class="tile answerButton is-size-3-tablet is-child field is-grouped is-primary">
           <p class="is-size-3-tablet answerLabel" id="ansFour">----</p>
         </b-button>
       </div>
@@ -88,13 +88,19 @@
 <script>
 export default {
   name: 'Game',
+  metaInfo: {
+    meta: [
+      { charset: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' }
+    ]
+  },
   data() {
     return {
         tableData: [],
         currQuestion: 1,
         currQuestionJSON: null,
         userLobbyId: 90909090,
-        nickname: "felicia",
+        nickname: "bethany",
         score: 2300,
         tableColumns: [
             {
@@ -137,6 +143,7 @@ export default {
       this.score += adjustment;
       document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;
       this.refreshLeaderboard();
+      this.tableData.push({id: 5050, lifeline5050: true, lifelineSkip: true, lobbyId: 90909090, name: "bethany", score: this.score, questionIndex: this.currQuestion}); // TEMPORARY FIX !! TODO: REMOVE THIS LATER after full API integration
       this.tableData.sort(function (a,b) {
         return b.score - a.score;
       });
@@ -180,29 +187,54 @@ export default {
       this.loadQs();
     },
     async getNewQs() { // for new lobbies only
-      this.easyQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=easy&type=multiple`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
-      this.mediumQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=medium&type=multiple`).then((res) => res.json()).then((res) => res.results);
-      this.hardQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=hard&type=multiple`).then((res) => res.json()).then((res) => res.results);
+      this.easyQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=easy&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
+      this.mediumQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=medium&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results);
+      this.hardQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=hard&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results);
+      console.info("Base64 questions");
       console.info(this.easyQs);
       console.info(this.mediumQs);
       console.info(this.hardQs);
       // this.createLobby(); // sending the tokens to the API for storage in the DB.
       this.loadQs();
     },
+    decodeJsonData() {  // had issues with HTML encoding so this converts the Base64 encoded data back into ASCII
+      let tempVar = this.currQuestionJSON;
+      this.currQuestionJSON.category = decodeURIComponent(escape(window.atob(tempVar.category)));
+      this.currQuestionJSON.correct_answer = decodeURIComponent(escape(window.atob(tempVar.correct_answer)));
+      this.currQuestionJSON.difficulty = decodeURIComponent(escape(window.atob(tempVar.difficulty)));
+      this.currQuestionJSON.question = decodeURIComponent(escape(window.atob(tempVar.question)));
+      this.currQuestionJSON.type = decodeURIComponent(escape(window.atob(tempVar.type)));
+      let incorrectAnswers = [];
+      let answer;
+      for (answer of tempVar.incorrect_answers) {
+        incorrectAnswers.push(decodeURIComponent(escape(window.atob(answer))));
+      }
+      this.currQuestionJSON.incorrect_answers = incorrectAnswers;
+      console.info(this.currQuestionJSON);
+    },
     loadQs() {
-      console.info(this.currQuestion - 1);
-      if (this.currQuestion <= 10) {
+      console.info(`current question: ${this.currQuestion - 1}`);
+      if (this.currQuestion < 10) {
         this.currQuestionJSON = this.easyQs[this.currQuestion -1];
       }
-      else if (this.currQuestion <= 20 && this.currQuestion > 10) {
-        this.currQuestionJSON = this.mediumQs[this.currQuestion -1];
+      else if (this.currQuestion < 20) {
+        this.currQuestionJSON = this.mediumQs[this.currQuestion -10];
       }
-      else if (this.currQuestion <= 30 && this.currQuestion > 20) {
-        this.currQuestionJSON = this.hardQs[this.currQuestion -1];
+      else if (this.currQuestion < 30) {
+        this.currQuestionJSON = this.hardQs[this.currQuestion -20];
       }
-      console.info(this.currQuestionJSON);
+      else if (this.currQuestion == 30) { // TODO: end of game
+        alert("Game over!");
+        const allAnsButtons = document.getElementsByClassName("answerButton");
+        let ansButton;
+        for (ansButton of allAnsButtons) {
+          ansButton.disabled = true;
+        }
+        return 0;
+      }
+      this.decodeJsonData();
       document.getElementById("questionNumber").innerHTML = `Question ${this.currQuestion}`;  // updates the question number and the topic
-      document.getElementById("questionTopic").innerHTML = `Topic: ${this.currQuestionJSON.category}`
+      document.getElementById("questionTopic").innerHTML = `Difficulty: ${this.currQuestionJSON.difficulty} <br>Topic: ${this.currQuestionJSON.category} </br>`
       this.updateQuestion();
     },
     updateQuestion() { // pick a random number between 1 and 4, this will be used to asign the correct answer to a button.
@@ -210,10 +242,12 @@ export default {
       const correctAnswer = this.getRandomNum(0,3);
       const answerLabels = document.getElementsByClassName("answerLabel");
       answerLabels[correctAnswer].innerHTML = this.currQuestionJSON.correct_answer;
+      console.info(`correct answer - ${this.currQuestionJSON.correct_answer}`);
       let counter = 0;
       for (let i = 0; i < answerLabels.length; i++) { // assigns the other answers to the remaining buttons
         if (answerLabels[i].innerHTML != this.currQuestionJSON.correct_answer) {
           answerLabels[i].innerHTML = this.currQuestionJSON.incorrect_answers[counter];
+          console.info(`incorrect answer - ${this.currQuestionJSON.incorrect_answers[counter]}`);
           counter++;
         }
       }
@@ -256,6 +290,10 @@ export default {
   $warning: #ffba49;
   $link: #20a39e;
   $info: #a4a9ad;
-    $danger: #f9b1b1;
+  $danger: #f9b1b1;
   $primary: #23001e;
+  .answerLabel {
+      white-space: break-spaces;
+
+  }
 </style>
