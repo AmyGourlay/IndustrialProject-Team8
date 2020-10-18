@@ -12,16 +12,16 @@
       </div>
       <div class="tile is-parent is-vertical"> <!-- SCORE AND LIFELINE TILES -->
         <article class="tile is-child box border">
-          <p class="title is-centered">Lifelines</p>
-          <p class="subtitle is-centered">Need some help? This is the place!</p>
-          <div class="buttons is-centered">
+          <p class="title centered">Lifelines</p>
+          <p class="subtitle">Need some help? This is the place!</p>
+          <div class="buttons">
             <b-button class="lifeline is-yellow">50/50</b-button>
             <b-button class="lifeline is-yellow">Skip Question</b-button>
           </div>
         </article>
         <article class="tile is-child box border">
-          <p class="title is-centered" id="playerPosition">2nd</p>
-          <p class="subtitle is-centered" id="playerScore">Score: 3000</p>
+          <p class="title" id="playerPosition">2nd</p>
+          <p class="subtitle" id="playerScore">Score: 3000</p>
         </article>
       </div>
     </div>
@@ -44,7 +44,7 @@
       </div>
       <div class="tile is-parent is-4"> <!-- LEADERBOARD TILE -->
         <article class="tile is-child box border">
-          <p class="subtitle is-centered">Wondering how your competitors are doing? This is the place for you 👀</p>
+          <p class="subtitle">Wondering how your competitors are doing? This is the place for you 👀</p>
           <div class="message">
             <div class="message-header">
               <p>Leaderboard</p>
@@ -82,11 +82,12 @@
 </template>
 
 <script>
+import SmallTable from '~/components/SmallTable'
 export default {
   name: 'Game',
   data() {
     return {
-        tableData: [],
+        info: [],
         currQuestion: 1,
         currQuestionJSON: null,
         userLobbyId: 90909090,
@@ -245,6 +246,7 @@ export default {
     this.startGame();
   },
 }
+
 </script>
 
 <style lang="scss">
@@ -253,6 +255,7 @@ export default {
   $info: #a4a9ad;
     $danger: #f9b1b1;
   $primary: #23001e;
+  $yellow: #ffba49;
 
   .border{
     border: 3px solid black;
@@ -269,13 +272,8 @@ export default {
   }
 
   .lifeline{
-    width: 170px;
+    width: 164px;
     height: 100px;
     font-size: 25px;;
   }
-
-  .is-centered{
-    text-align: center;
-  }
-
 </style>

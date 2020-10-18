@@ -3,10 +3,10 @@
 
     <section class="section is-fullheight">
       <div class="column is-mobile is-centered">
-          <b-button type="is-primary" @click="createLobby">
+          <!--<b-button type="is-primary" @click="createLobby">
             <b-icon class="icon" pack="mdi" icon="refresh">
             </b-icon>
-          </b-button>
+          </b-button>--> <!--////////////////FOR HOMEPAGE/////////////////-->
           <LobbyCodeLbl title="Lobby Code Goes Here (ಥ﹏ಥ)"></LobbyCodeLbl>
       </div>
       <div class="column is-mobile is-centered">
@@ -17,7 +17,7 @@
           <router-link to="/game"><BlackButton title="Start Game" to="./game.vue"></BlackButton></router-link>
         </div>
         <div class="column is-3">
-          <BlackButton title="Leave Game"></BlackButton>
+          <router-link to="/"><BlackButton title="Leave Game"></BlackButton></router-link>
         </div>
       </div>
     </section>

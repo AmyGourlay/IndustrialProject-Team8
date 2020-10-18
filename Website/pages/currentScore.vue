@@ -1,66 +1,38 @@
 <template>
-  <div class="container">
     <div class="tile is-ancestor">
-      <div class="tile is-parent is-8">
-        <article class="tile is-child box"><!-- QUESTION TILE -->
-          <p class="title" id="Streak">Your correct answer streak is...</p>
-          <p class="subtitle" id="timer">Next question in 5s</p>
-          <div class="content">
-            <p class="is-size-3-tablet" id="questionBox"></p>
-          </div>
-        </article>
-      </div>
-      <div class="tile is-parent is-vertical"> <!-- SCORE AND LIFELINE TILES -->
-        
-        <article class="tile is-child box">
-          <p class="title" id="playerPosition">2nd</p>
-          <p class="subtitle" id="playerScore">Score: 3000</p>
-        </article>
-      </div>
+        <div class="tile is-parent">
+        <div class="tile is-child box border">
+            <p class="title baa titlefont" id="Streak">Your correct answer streak is...</p>
+            <p class="subtitle baa subfont" id="timer">Next question in 5s</p>
+        </div>
     </div>
-    <div class="tile is-ancestor">
-      <div class="tile is-parent is-vertical buttons">
-        
-      </div>
-      <div class="tile is-parent is-vertical buttons">
-        
-      </div>
-      <div class="tile is-parent is-4"> <!-- LEADERBOARD TILE -->
-        <article class="tile is-child box">
-          <p class="subtitle">Wondering how your competitors are doing? This is the place for you 👀</p>
+    <div class="tile is-4 is-vertical is-parent">
+        <div class="tile is-child box border">
+            <p class="title baa titlefont" id="playerPosition">2nd</p>
+            <p class="subtitle baa subfont" id="playerScore">Score: 3000</p>
+        </div>
+        <div class="tile is-child is-vertical box border">
           <div class="message">
             <div class="message-header">
               <p>Leaderboard</p>
-              <b-button class="button" type="is-primary" @click="refreshLeaderboard">
-                <b-icon class="icon" pack="mdi" icon="refresh">
-                </b-icon>
-              </b-button>
             </div>
             <div class="message-body">
-              <b-table
-                :data="tableData"
-                :columns="tableColumns"
-                :perPage="5"
-                paginated
-                default-sort="score"
-                default-sort-direction="desc"
-                :paginationSimple="false"
-              ></b-table>
+              <SmallTable></SmallTable>
             </div>
           </div>
-        </article>
-      </div>
-    </div>
-
-  </div> <!-- closing container tag-->
+        </div>
+  </div>
+  
+</div>
 </template>
 
 <script>
+import SmallTable from '~/components/SmallTable'
 export default {
   name: 'Game',
   data() {
     return {
-        tableData: [],
+        info: [],
         currQuestion: 1,
         currQuestionJSON: null,
         userLobbyId: 90909090,
@@ -136,10 +108,30 @@ export default {
 }
 </script>
 
-<style lang="scss">
-  $warning: #ffba49;
-  $link: #20a39e;
-  $info: #a4a9ad;
-    $danger: #f9b1b1;
-  $primary: #23001e;
+<style>
+
+  .template{
+      height: 100%;
+  }
+
+  .baa{
+    text-align: center;
+  }
+
+  .titlefont{
+      font-size: 100px;
+  }
+
+  .subfont{
+      font-size: 60px
+  }
+
+  .border{
+      border: 3px solid black;
+  }
+
+  .message-header{
+      background-color: black;
+  }
+
 </style>

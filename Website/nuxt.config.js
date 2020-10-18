@@ -48,7 +48,7 @@ export default {
 
   proxy: {
     '/quizApi/': {
-      target: 'https://riddlersquizapi.azurewebsites.net',
+      target: 'https://riddlersquizapiv2.azurewebsites.net',
       pathRewrite: { '^/quizApi/': '/api/' }
     },
     '/getQToken/': {
