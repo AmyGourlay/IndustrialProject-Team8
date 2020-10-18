@@ -1,4 +1,6 @@
 <template>
+<div>
+    <GameMusic />
     <div class="howtoplaybox">
         <div class="box">
             <article class="content">
@@ -15,14 +17,17 @@
             </article>
         </div>
     </div>
+</div>
 </template>
 
 <script>
+import GameMusic from '~/components/GameMusic'
 import BlackButton from '~/components/BlackButton'
     export default {
         components: 
             {
-                BlackButton
+                BlackButton,
+                GameMusic
             }
     }
 </script>
@@ -70,5 +75,10 @@ import BlackButton from '~/components/BlackButton'
     letter-spacing: 0px;
     color: #24011E;
     opacity: 1;
+}
+.img
+{
+    margin-top: 30px;
+    margin-right: 70px;
 }
 </style>

@@ -30,7 +30,7 @@
 }
 .box
 {
-    display: table;
+    display: table-cell;
     padding: 0px;
     top: 48px;
     left: 355px;

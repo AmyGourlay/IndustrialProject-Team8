@@ -1,4 +1,6 @@
 <template>
+<div>
+    <GameMusic />
     <div class="aboutbox">
         <div class="box">
             <article class="content">
@@ -16,13 +18,16 @@
             </article>
         </div>
     </div>
+</div>
 </template>
 
 <script>
+import GameMusic from '~/components/GameMusic'
  import BlackButton from '~/components/BlackButton'
     export default {
         components: 
             {
+                GameMusic,
                 BlackButton
             }
     }
