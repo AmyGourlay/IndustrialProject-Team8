@@ -1,83 +1,37 @@
 <template>
-<div>
-  <GameMusic />
-  <article class="panel is-primary">
-  <p class="panel-heading">
-    Quizz.io
-  </p>
-  <p class="panel-tabs">
-    <a>How To Play</a>
-    <a>About</a>
-  </p>
-  <div class="panel-block">
-    <p class="control has-icons-left">
-      <input class="input is-primary" type="text" placeholder="Nickname">
-      <span class="icon is-left">
-        <i class="fas fa-search" aria-hidden="true"></i>
-      </span>
-    </p>
-  </div>
-  <a class="panel-block is-active">
-    <span class="panel-icon">
-
-    </span>
-    bulma
-  </a>
-</article>
-</div>
-  <!-- <section class="section">
+  <section class="section">
+    <container>
+    <img src="~/assets/volume_on.png" @click="toggle" alt="Toggle Sound" height="120px" width="120px" align="right">
+    </container>
     <div class="columns is-mobile">
-      <card
-        title="Free"
-        icon="github"
-      >
-        Open source on <a href="https://github.com/buefy/buefy">
-          GitHub
-        </a>
-      </card>
-
-      <card
-        title="Responsive"
-        icon="cellphone-link"
-      >
-        <b class="has-text-grey">
-          Every
-        </b> component is responsive
-      </card>
-
-      <card
-        title="Modern"
-        icon="alert-decagram"
-      >
-        Built with <a href="https://vuejs.org/">
-          Vue.js
-        </a> and <a href="http://bulma.io/">
-          Bulma
-        </a>
-      </card>
-
-      <card
-        title="Lightweight"
-        icon="arrange-bring-to-front"
-      >
-        No other internal dependency
-      </card>
+      <Header></Header>
     </div>
-  </section> -->
+    <!-- <Button title="How To Play"></Button>
+    <Button title="About"></Button> -->
+  </section>
 </template>
 
 <script>
-import GameMusic from '~/components/GameMusic.vue';
-import Card from '~/components/Card'
-import header from '~/components/header'
+import Header from '~/components/Header'
+import BlackButton from '~/components/BlackButton'
 
 export default {
   name: 'HomePage',
+  methods:
+  {
+    toggle()
+    {
+      
+    }
+  },
 
   components: {
-    Card,
-    header,
-    GameMusic
+    Header,
+    BlackButton
   }
+
 }
 </script>
+
+<style>
+</style>
