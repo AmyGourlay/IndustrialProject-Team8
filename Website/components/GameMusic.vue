@@ -1,7 +1,7 @@
 <template>
     <section class="sound">
         <audio id="audio" src="~/assets/Quizz.mp3" autoplay loop></audio>
-        <!--<b-button @click="clickMe">Pause</b-button>-->
+        <img class="img" src="~/assets/volume_on.png" @click="toggle" alt="Toggle Sound" height="120px" width="120px" align="right">
     </section>
 </template>
 
@@ -12,9 +12,17 @@ export default
     name: "GameMusic",
 
     methods: {
-        clickMe() 
+        toggle() 
         {
-            audio.pause();
+            if(!audio.paused)
+            {
+                audio.pause();
+            }
+            else
+            {
+                audio.play();
+            }
+                
         }
     }
 }

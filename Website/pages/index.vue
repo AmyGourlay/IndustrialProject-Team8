@@ -2,6 +2,11 @@
 <div>
   <GameMusic />
   <section class="section">
+    <div class="columns is-mobile">
+      <Header></Header>
+    </div>
+    <!-- <Button title="How To Play"></Button>
+    <Button title="About"></Button> -->
   </section>
   <section class="nickname">
      <b-field>
@@ -11,7 +16,7 @@
         <nuxt-link to="/lobby"><BlackButton title="Join Lobby"></BlackButton></nuxt-link>
       </div>
       <div class="createButton">
-        <nuxt-link to="/lobby"><BlackButton title="Create Lobby" @click="createLobby"></BlackButton></nuxt-link>
+        <nuxt-link to="/lobby"><BlackButton title="Create Lobby"></BlackButton></nuxt-link>
       </div>
   </section>
 </div>
@@ -21,40 +26,23 @@
 import GameMusic from '~/components/GameMusic'
 import Header from '~/components/Header'
 import BlackButton from '~/components/BlackButton'
+
 export default {
   name: 'HomePage',
   components: {
     Header,
     BlackButton,
-    GameMusic,
-  },
-  methods: {
-    async createLobby() {
-      console.info("In lobby vue!");
-      const date = new Date();
-      const newLobby = {
-        easyQs: "",
-        mediumQs: "",
-        hardQs: "",
-        date: date.toISOString(),
-        requestURL: "amount=10&category=9&type=multiple&encode=base64"
-      };
-      this.lobbyInfo = await fetch('/quizApi/Lobbies', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8'
-        },
-        body: JSON.stringify(newLobby)
-      }).then((res) => res.json());
-      console.info(this.lobbyInfo);
-      document.getElementById("lobbyCode").innerHTML = this.lobbyInfo.id;
-    }
+    GameMusic
   }
+
 }
 </script>
 
 <style>
-
+body
+{
+  /* background image */
+}
 .nickname
 {
   width: 950px;
