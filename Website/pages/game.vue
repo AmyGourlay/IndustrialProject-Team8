@@ -188,9 +188,9 @@ export default {
     },
     updatePlayerScoreAndPos(adjustment) {
       this.score += adjustment;
-      document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;
       this.refreshLeaderboard();
-      this.updatePlayerTable();
+      if (adjustment != 0) { this.updatePlayerTable(); }
+      document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;
       // this.tableData.push({id: 5050, lifeline5050: true, lifelineSkip: true, lobbyId: 90909090, name: "bethany", score: this.score, questionIndex: this.currQuestion}); // TEMPORARY FIX !! TODO: REMOVE THIS LATER after full API integration
       this.tableData.sort((a,b) => b.score - a.score);
       let playerPos = 0;
