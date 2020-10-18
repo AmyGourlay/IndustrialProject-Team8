@@ -269,8 +269,8 @@ export default {
       else if (this.currQuestion < 30) {
         this.currQuestionJSON = this.lobbyInfo.hardQuestions[this.currQuestion -20];
       }
-      else if (this.currQuestion == 30) { // TODO: end of game
-        alert("Game over!");
+      if (this.currQuestion == 6) { // TODO: end of game
+        document.location.href = "http://localhost:3000/results";
         const allAnsButtons = document.getElementsByClassName("answerButton");
         let ansButton;
         for (ansButton of allAnsButtons) {
