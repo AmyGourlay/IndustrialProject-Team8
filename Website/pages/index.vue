@@ -3,7 +3,7 @@
   <GameMusic />
   <section class="section">
     <div class="columns is-mobile">
-      <Header></Header>
+      <!--<Header></Header>-->
     </div>
     <!-- <Button title="How To Play"></Button>
     <Button title="About"></Button> -->

@@ -1,8 +1,5 @@
 <template>
-<div>
-    <GameMusic />
-    <div class="howtoplaybox">
-        <div class="box">
+    <div class="tile notification is-white">
             <article class="content">
                 <h2>Quizz.io</h2>
                 <div class="media-content">
@@ -15,9 +12,7 @@
                     <nuxt-link to="/"><BlackButton title="Back"></BlackButton></nuxt-link>
                 </div>
             </article>
-        </div>
     </div>
-</div>
 </template>
 
 <script>
@@ -46,10 +41,6 @@ import BlackButton from '~/components/BlackButton'
     width: 950px;
     height: 188px;
     display: table;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
 }
 .content
 {
