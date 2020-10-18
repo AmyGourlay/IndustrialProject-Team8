@@ -183,13 +183,13 @@ export default {
           'Content-Type': 'application/json;charset=utf-8'
         },
         body: JSON.stringify(playerInfo)
-      }).then((res) => res.json());
+      });
       console.info(response);
     },
     updatePlayerScoreAndPos(adjustment) {
       this.score += adjustment;
-      this.refreshLeaderboard();
       if (adjustment != 0) { this.updatePlayerTable(); }
+      this.refreshLeaderboard();
       document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;
       // this.tableData.push({id: 5050, lifeline5050: true, lifelineSkip: true, lobbyId: 90909090, name: "bethany", score: this.score, questionIndex: this.currQuestion}); // TEMPORARY FIX !! TODO: REMOVE THIS LATER after full API integration
       this.tableData.sort((a,b) => b.score - a.score);
