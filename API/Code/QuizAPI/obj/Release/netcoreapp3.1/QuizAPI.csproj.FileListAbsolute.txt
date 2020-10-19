@@ -308,3 +308,4 @@ C:\Users\kylel\Documents\GitHub\IndustrialProject-Team8\API\Code\QuizAPI\obj\Rel
 C:\Users\kylel\Documents\GitHub\IndustrialProject-Team8\API\Code\QuizAPI\obj\Release\netcoreapp3.1\QuizAPI.dll
 C:\Users\kylel\Documents\GitHub\IndustrialProject-Team8\API\Code\QuizAPI\obj\Release\netcoreapp3.1\QuizAPI.pdb
 C:\Users\kylel\Documents\GitHub\IndustrialProject-Team8\API\Code\QuizAPI\obj\Release\netcoreapp3.1\QuizAPI.genruntimeconfig.cache
+C:\Users\kylel\Documents\GitHub\IndustrialProject-Team8\API\Code\QuizAPI\bin\Release\netcoreapp3.1\Properties\ServiceDependencies\riddlersquizapiv2 - Web Deploy\profile.arm.json

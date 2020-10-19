@@ -12,6 +12,6 @@
     <WebStackScaffolding_LayoutPageFile />
     <WebStackScaffolding_DbContextTypeFullName>QuizAPI.Models.PlayerContext</WebStackScaffolding_DbContextTypeFullName>
     <WebStackScaffolding_IsAsyncSelected>False</WebStackScaffolding_IsAsyncSelected>
-    <NameOfLastUsedPublishProfile>RiddlersQuizAPI - Web Deploy</NameOfLastUsedPublishProfile>
+    <NameOfLastUsedPublishProfile>riddlersquizapiv2 - Web Deploy</NameOfLastUsedPublishProfile>
   </PropertyGroup>
 </Project>
