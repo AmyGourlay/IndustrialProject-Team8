@@ -186,21 +186,20 @@ export default {
       });
       console.info(response);
     },
-    updatePlayerScoreAndPos(adjustment) {
-      this.score += adjustment;
-      if (adjustment != 0) { this.updatePlayerTable(); }
-      this.refreshLeaderboard();
+    async updatePlayerScoreAndPos(adjustment) {
+      if (adjustment == 0) {
+        this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json());
+        this.score = this.findCurrentPlayer(false);
+      }
+      else {
+        this.score += adjustment;
+        this.updatePlayerTable();
+        this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json);
+      }
       document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;
       // this.tableData.push({id: 5050, lifeline5050: true, lifelineSkip: true, lobbyId: 90909090, name: "bethany", score: this.score, questionIndex: this.currQuestion}); // TEMPORARY FIX !! TODO: REMOVE THIS LATER after full API integration
       this.tableData.sort((a,b) => b.score - a.score);
-      let playerPos = 0;
-      for (playerPos=0; playerPos < this.tableData.length; playerPos++) {
-        console.info("in player loop!");
-        if (this.tableData[playerPos].name === this.nickname) {
-            break;
-        }
-      }
-      playerPos++;
+      let playerPos = this.findCurrentPlayer(true);
       let positionElem = document.getElementById("playerPosition");
       console.info(`Player position: ${playerPos}`);
       switch (playerPos) {
@@ -218,14 +217,25 @@ export default {
           break;
       }
     },
+    findCurrentPlayer(position) {
+      for (let playerPos=0; playerPos < this.tableData.length; playerPos++) {
+        console.info("in player loop!");
+        if (this.tableData[playerPos].name === this.nickname) {
+            if (position) {
+              playerPos++;
+              return playerPos;
+            }
+            else {
+              return this.tableData[playerPos].score;
+            }
+        }
+      }
+
+    },
     getNextQuestion() {
       this.currQuestion++;
       this.updatePlayerTable();
       this.loadQs();
-    },
-    async refreshLeaderboard() {
-      this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json());
-      console.info(this.tableData);
     },
     async getQs() {
       this.lobbyInfo = await fetch(`/quizApi/Lobbies/${this.lobbyInfo.id}`).then((res) => res.json());
