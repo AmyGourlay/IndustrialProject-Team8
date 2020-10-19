@@ -21,7 +21,7 @@
         </article>
         <article class="tile is-child box border">
           <p class="title is-centered" id="playerPosition">---</p>
-          <p class="subtitle is-centered" id="playerScore">Score: ---</p> 
+          <p class="subtitle is-centered" id="playerScore">Score: ---</p>
         </article>
       </div>
     </div>
@@ -186,9 +186,6 @@ export default {
       }).then((res) => res.json());
       console.info(response);
     },
-      });
-      console.info(response);
-    },
     async updatePlayerScoreAndPos(adjustment) {
       if (adjustment == 0) {
         this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json());
@@ -283,6 +280,7 @@ export default {
       }
       else if (this.currQuestion == 30) { // TODO: end of game
         alert("Game over!");
+      }
       if (this.currQuestion == 6) { // TODO: end of game
         document.location.href = "http://localhost:3000/results";
         const allAnsButtons = document.getElementsByClassName("answerButton");
