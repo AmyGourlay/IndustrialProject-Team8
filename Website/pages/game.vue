@@ -1,5 +1,26 @@
 <template>
   <div class="container">
+    <!--TIMER CODE TAKEN FROM https://medium.com/js-dojo/how-to-create-an-animated-countdown-timer-with-vue-89738903823f-->
+      <div class="base-timer">
+        <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <g class="base-timer__circle">
+            <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+            <path
+              :stroke-dasharray="circleDasharray"
+              class="base-timer__path-remaining"
+              :class="remainingPathColor"
+              d="
+                M 50, 50
+                m -45, 0
+                a 45,45 0 1,0 90,0
+                a 45,45 0 1,0 -90,0
+              "
+            ></path>
+          </g>
+        </svg>
+        <span class="base-timer__label">{{ formattedTimeLeft }}</span>
+      </div>
+
     <div class="tile is-ancestor">
       <div class="tile is-parent is-8">
         <article class="tile is-child box border"><!-- QUESTION TILE -->
@@ -22,6 +43,7 @@
         <article class="tile is-child box border">
           <p class="title is-centered" id="playerPosition">---</p>
           <p class="subtitle is-centered" id="playerScore">Score: ---</p>
+          <p class="subtitle is-centered" id="streak">---</p>
         </article>
       </div>
     </div>
@@ -82,6 +104,26 @@
 </template>
 
 <script>
+const FULL_DASH_ARRAY = 283;
+const WARNING_THRESHOLD = 10;
+const ALERT_THRESHOLD = 5;
+
+const COLOR_CODES = {
+  info: {
+    color: "green"
+  },
+  warning: {
+    color: "orange",
+    threshold: WARNING_THRESHOLD
+  },
+  alert: {
+    color: "red",
+    threshold: ALERT_THRESHOLD
+  }
+};
+
+const TIME_LIMIT = 30;
+
 export default {
   name: 'Game',
   metaInfo: {
@@ -98,6 +140,10 @@ export default {
         lifeline5050: true,
         lifelineSkip: true,
         nickname: "",
+        streak: 0,
+        timePassed: 0,
+        timerInterval: null,
+
         score: 0,
         tableColumns: [
             {
@@ -155,10 +201,13 @@ export default {
       console.info(document.getElementById(buttonId).innerHTML)
       if (document.getElementById(buttonId).innerHTML == this.currQuestionJSON.correct_answer) {
         alert("Correct answer! ✔");
-        this.updatePlayerScoreAndPos(500);
+        this.streak+=1;
+        this.updatePlayerScoreAndPos(((30-(this.timePassed))*10)*(this.streak));
+
       }
       else {
         alert("Wrong answer! ❌");
+        this.streak==1;
         this.updatePlayerScoreAndPos(-500);
       }
       this.getNextQuestion();
@@ -233,6 +282,7 @@ export default {
         this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json);
       }
       document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;
+      document.getElementById("streak").innerHTML = `Streak: ${this.streak}`;
       // this.tableData.push({id: 5050, lifeline5050: true, lifelineSkip: true, lobbyId: 90909090, name: "bethany", score: this.score, questionIndex: this.currQuestion}); // TEMPORARY FIX !! TODO: REMOVE THIS LATER after full API integration
       this.tableData.sort((a,b) => b.score - a.score);
       let playerPos = this.findCurrentPlayer(true);
@@ -374,6 +424,7 @@ export default {
           counter++;
         }
       }
+      this.startTimer();
     },
     /*
      *  Get a random number function
@@ -382,6 +433,64 @@ export default {
      */
     getRandomNum (min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
+    },
+    onTimesUp() {
+      clearInterval(this.timerInterval);
+      this.updatePlayerScoreAndPos(0);
+      this.getNextQuestion();
+      this.streak == 0;
+    },
+    startTimer() {
+      this.timePassed = 0;
+      clearInterval(this.timerInterval);
+      this.timerInterval = setInterval(() => (this.timePassed += 1), 1000);
+    }
+
+  },
+  computed: {
+    circleDasharray() {
+      return `${(this.timeFraction * FULL_DASH_ARRAY).toFixed(0)} 283`;
+    },
+
+    formattedTimeLeft() {
+      const timeLeft = this.timeLeft;
+      const minutes = Math.floor(timeLeft / 60);
+      let seconds = timeLeft % 60;
+
+      if (seconds < 10) {
+        seconds = `0${seconds}`;
+      }
+
+      return `${minutes}:${seconds}`;
+    },
+
+    timeLeft() {
+      return TIME_LIMIT - this.timePassed;
+    },
+
+    timeFraction() {
+      const rawTimeFraction = this.timeLeft / TIME_LIMIT;
+      return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
+    },
+
+    remainingPathColor() {
+      const { alert, warning, info } = COLOR_CODES;
+
+      if (this.timeLeft <= alert.threshold) {
+        return alert.color;
+      } else if (this.timeLeft <= warning.threshold) {
+        return warning.color;
+      } else {
+        return info.color;
+      }
+    }
+  },
+
+  watch: {
+    timeLeft(newValue) {
+      if (newValue === 0) {
+        this.onTimesUp();
+      }
     }
   },
   /*
@@ -439,4 +548,61 @@ export default {
   .is-centered{
     text-align: center;
   }
+
+    .base-timer {
+  position: fixed;
+  top: 960px;
+  left: 985px;
+  width: 100px;
+  height: 100px;
+  z-index: 2;
+  background-color: white;
+
+  &__svg {
+    transform: scaleX(-1);
+  }
+
+  &__circle {
+    fill: none;
+    stroke: none;
+  }
+
+  &__path-elapsed {
+    stroke-width: 7px;
+    stroke: grey;
+  }
+
+  &__path-remaining {
+    stroke-width: 7px;
+    stroke-linecap: round;
+    transform: rotate(90deg);
+    transform-origin: center;
+    transition: 1s linear all;
+    fill-rule: nonzero;
+    stroke: currentColor;
+
+    &.green {
+      color: rgb(65, 184, 131);
+    }
+
+    &.orange {
+      color: orange;
+    }
+
+    &.red {
+      color: red;
+    }
+  }
+
+  &__label {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+  }
+}
 </style>
