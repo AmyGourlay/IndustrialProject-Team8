@@ -4,7 +4,7 @@
       <div class="tile is-parent is-8">
         <article class="tile is-child box border"><!-- QUESTION TILE -->
           <p class="title" id="questionNumber">Question 000</p>
-          <p class="subtitle" id="questionTopic">Topic: ---</p>
+          <p class="subtitle" id="questionTopic">Difficulty: --- <br>Topic: --- <br/></p>
           <div class="content">
             <p class="is-size-3-tablet" id="questionBox"></p>
           </div>
@@ -21,7 +21,7 @@
         </article>
         <article class="tile is-child box border">
           <p class="title is-centered" id="playerPosition">---</p>
-          <p class="subtitle is-centered" id="playerScore">Score: ---</p>
+          <p class="subtitle is-centered" id="playerScore">Score: ---</p> 
         </article>
       </div>
     </div>
@@ -183,6 +183,9 @@ export default {
           'Content-Type': 'application/json;charset=utf-8'
         },
         body: JSON.stringify(playerInfo)
+      }).then((res) => res.json());
+      console.info(response);
+    },
       });
       console.info(response);
     },
@@ -230,7 +233,6 @@ export default {
             }
         }
       }
-
     },
     getNextQuestion() {
       this.currQuestion++;
@@ -279,6 +281,8 @@ export default {
       else if (this.currQuestion < 30) {
         this.currQuestionJSON = this.lobbyInfo.hardQuestions[this.currQuestion -20];
       }
+      else if (this.currQuestion == 30) { // TODO: end of game
+        alert("Game over!");
       if (this.currQuestion == 6) { // TODO: end of game
         document.location.href = "http://localhost:3000/results";
         const allAnsButtons = document.getElementsByClassName("answerButton");
@@ -331,9 +335,8 @@ export default {
   $warning: #ffba49;
   $link: #20a39e;
   $info: #a4a9ad;
-    $danger: #f9b1b1;
+  $danger: #f9b1b1;
   $primary: #23001e;
-
   .answerLabel {
       white-space: break-spaces;
 
@@ -362,5 +365,4 @@ export default {
   .is-centered{
     text-align: center;
   }
-
 </style>
