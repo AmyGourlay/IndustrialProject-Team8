@@ -117,10 +117,18 @@ export default {
     }
   },
   methods: {
+    /*
+     *  Start Game function
+     *  Starts the whole game process off. Runs once, takes no parameters.
+     */
     startGame() {
       console.log("YAY");
       this.getQs();
     },
+    /*
+     *  Get Game Details function
+     *  This function gets the player's info so that their score and details can be pulled from the database
+     */
     getGameDetails() {
       let allCookies = document.cookie;
       let cookieArr = allCookies.split('; ');
@@ -138,6 +146,11 @@ export default {
       this.nickname = nickname;
       return lobbyId;
     },
+    /*
+     *  Check Answer function
+     *  Called when the player clicks any of the four answer buttons, it checks if the button pressed contained the correct answer to the
+     *  question, returns the appropriate message, adjusts their score and gets the next question.
+     */
     checkAnswer(buttonId) {
       console.info(document.getElementById(buttonId).innerHTML)
       if (document.getElementById(buttonId).innerHTML == this.currQuestionJSON.correct_answer) {
@@ -150,6 +163,11 @@ export default {
       }
       this.getNextQuestion();
     },
+    /*
+     *  Update Lobby Table function
+     *  Updates the database with the questions generated in the front end so players can pull that data when they want to play
+     *  TODO: the PUT requests need to be fixed API side, so this function will need amending at some point
+     */
     async updateLobbyTable() {
       let tempLobbyInfo = {
         id: this.lobbyInfo.id,
@@ -167,6 +185,11 @@ export default {
       console.info("IN UPDATE LOBBY");
       console.info(response);
     },
+    /*
+     *  Update Player Table function
+     *  Updates the database with the Player's info, such as their score, what question they're up to etc.
+     *  Currently, it sends everything back to the database, rather than just what needs updating.
+     */
     async updatePlayerTable(){
       let playerInfo = {
         name: this.nickname,
@@ -186,6 +209,19 @@ export default {
       }).then((res) => res.json());
       console.info(response);
     },
+    /*
+     *  Update Player Score and Position function
+     *
+     *  This function has two purposes - adjusting the player's score and updating the score, position and leaderboard elements.
+     *  If it is run at the start of the game, it will query the database for the current player's score and save that as their existing score.
+     *  otherwise, it will adjust their score locally and then update the database with the change and pull the latest changes from the database
+     *  It also updates the position shown on screen so the player knows where they place on the leaderboard
+     *
+     *  TODO: a possible fix to the weird updating bug could be fetching the leaderboard, amending it with the player's new score and then updating the database with the new score.
+     *     NB: This shouldn't affect how the leaderboard position function works
+     *     (the issue is that the database doesn't get updated fast enough for it to show the new changes, so this would be a good way round that.)
+     *  TODO: This function also should set the player's question to whatever is stored in the database
+     */
     async updatePlayerScoreAndPos(adjustment) {
       if (adjustment == 0) {
         this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json());
@@ -217,6 +253,11 @@ export default {
           break;
       }
     },
+    /*
+     *  Find Current Player in the Table function
+     *  This function finds the player's data in the latest version of the data pulled from the database.
+     *  It can be used to get the player's score or their position in the leaderboard
+     */
     findCurrentPlayer(position) {
       for (let playerPos=0; playerPos < this.tableData.length; playerPos++) {
         console.info("in player loop!");
@@ -231,11 +272,21 @@ export default {
         }
       }
     },
+    /*
+     *  Get Next Question function
+     *  This function simply gets the next question by iterating the player's question index that is locally stored. It updates the data in the Player table and then loads the new question.
+     */
     getNextQuestion() {
       this.currQuestion++;
       this.updatePlayerTable();
       this.loadQs();
     },
+    /*
+     *  Get Questions from Open Trivia DB API function
+     *  This function loads the questions from either the Open Trivia DB or from the Database.
+     *  If it loads them from the Open Trivia DB, then it would save them locally and then update the database with the new questions so other players can play using the same question.
+     *  Otherwise, it will just continue to load the question the player is currently on. (as the questions will be stored in the lobbyInfo object pulled from the DB)
+     */
     async getQs() {
       this.lobbyInfo = await fetch(`/quizApi/Lobbies/${this.lobbyInfo.id}`).then((res) => res.json());
       console.info("IN HERE");
@@ -252,6 +303,10 @@ export default {
 
       this.loadQs();
     },
+    /*
+     *  Decode JSON Data function
+     *  This function is responsible for decoding the Base64. It decodes them and stores it in the currQuestionJSON object which stores the JSON data of the current question.
+     */
     decodeJsonData() {  // had issues with HTML encoding so this converts the Base64 encoded data back into ASCII
       let tempVar = this.currQuestionJSON;
       this.currQuestionJSON.category = decodeURIComponent(escape(window.atob(tempVar.category)));
@@ -267,6 +322,11 @@ export default {
       this.currQuestionJSON.incorrect_answers = incorrectAnswers;
       console.info(this.currQuestionJSON);
     },
+    /*
+     *  Load Current Question function
+     *  This function loads the current question - so it loads the data into the currQuestionJSON object from the lobbyInfo object.
+     *  It decodes the question data, updates the question field as well as the difficulty, the topic and the question number fields.
+     */
     loadQs() {
       console.info(`current question: ${this.currQuestion - 1}`);
       if (this.currQuestion < 10) {
@@ -293,10 +353,15 @@ export default {
       this.decodeJsonData();
       document.getElementById("questionNumber").innerHTML = `Question ${this.currQuestion}`;  // updates the question number and the topic
       document.getElementById("questionTopic").innerHTML = `Difficulty: ${this.currQuestionJSON.difficulty} <br>Topic: ${this.currQuestionJSON.category} </br>`
+      document.getElementById("questionBox").innerHTML = this.currQuestionJSON.question;  // updates the question box and shows the question to the player
       this.updateQuestion();
     },
+    /*
+     *  Update Question Buttons function
+     *  This function updates the answwwer buttons by randomly selecting one of them to be the correct answer and then populating the remaining buttons with incorrect answers
+     *  TODO: remove the info log commands from this function so that the answers aren't given away
+     */
     updateQuestion() { // pick a random number between 1 and 4, this will be used to asign the correct answer to a button.
-      document.getElementById("questionBox").innerHTML = this.currQuestionJSON.question;  // updates the question box and shows the question to the player
       const correctAnswer = this.getRandomNum(0,3);
       const answerLabels = document.getElementsByClassName("answerLabel");
       answerLabels[correctAnswer].innerHTML = this.currQuestionJSON.correct_answer;
@@ -310,10 +375,21 @@ export default {
         }
       }
     },
-    getRandomNum (min, max) { // SOURCE: https://www.freecodecamp.org/news/how-to-use-javascript-math-random-as-a-random-number-generator/
+    /*
+     *  Get a random number function
+     *  This simply generates a random number between the given range and returns it.
+     *  SOURCE: https://www.freecodecamp.org/news/how-to-use-javascript-math-random-as-a-random-number-generator/
+     */
+    getRandomNum (min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
   },
+  /*
+   *  The starting function!
+   *  This function is what is called when the page loads.
+   *  The lobby information is loaded locally from the database and the player's nickname and lobby ID field are updated on screen.
+   *  This function also gets the score and player info from the DB via update player score and position function.
+   */
   async fetch() {
     let lobbyId = this.getGameDetails();
     this.lobbyInfo = await fetch(`/quizApi/Lobbies/${lobbyId}`).then((res) => res.json());
