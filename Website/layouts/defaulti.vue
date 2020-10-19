@@ -3,13 +3,13 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent">
         <article class="tile is-child box">
-          <p class="title">12345678</p>
+          <p class="title" id="lobbyCode">----</p>
           <p class="subtitle">Lobby code</p>
         </article>
       </div>
       <div class="tile is-parent">
         <article class="tile is-child box">
-          <p class="title"> xXx_qUiZlOrd3_xXx </p>
+          <p class="title" id="userNickname"> ---- </p>
           <p class="subtitle">Nickname</p>
         </article>
       </div>
@@ -49,3 +49,16 @@ export default {
   }
 }
 </script>
+
+<style>
+.panel-heading
+{
+  text-align: center;
+  
+}
+.is-primary.is-active.input 
+{
+  text-align: center;
+}
+
+</style>
