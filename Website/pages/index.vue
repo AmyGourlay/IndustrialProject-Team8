@@ -1,53 +1,63 @@
 <template>
+<div>
+  <GameMusic />
   <section class="section">
     <div class="columns is-mobile">
-      <card
-        title="Free"
-        icon="github"
-      >
-        Open source on <a href="https://github.com/buefy/buefy">
-          GitHub
-        </a>
-      </card>
-
-      <card
-        title="Responsive"
-        icon="cellphone-link"
-      >
-        <b class="has-text-grey">
-          Every
-        </b> component is responsive
-      </card>
-
-      <card
-        title="Modern"
-        icon="alert-decagram"
-      >
-        Built with <a href="https://vuejs.org/">
-          Vue.js
-        </a> and <a href="http://bulma.io/">
-          Bulma
-        </a>
-      </card>
-
-      <card
-        title="Lightweight"
-        icon="arrange-bring-to-front"
-      >
-        No other internal dependency
-      </card>
+      <!--<Header></Header>-->
     </div>
+    <!-- <Button title="How To Play"></Button>
+    <Button title="About"></Button> -->
   </section>
+  <section class="nickname">
+     <b-field>
+       <b-input placeholder="Enter Nickname" size="is-large" icon="account" rounded></b-input>
+     </b-field>
+     <div class="joinButton">
+        <nuxt-link to="/lobby"><BlackButton title="Join Lobby"></BlackButton></nuxt-link>
+      </div>
+      <div class="createButton">
+        <nuxt-link to="/lobby"><BlackButton title="Create Lobby"></BlackButton></nuxt-link>
+      </div>
+  </section>
+</div>
 </template>
 
 <script>
-import Card from '~/components/Card'
+import GameMusic from '~/components/GameMusic'
+import Header from '~/components/Header'
+import BlackButton from '~/components/BlackButton'
 
 export default {
   name: 'HomePage',
-
   components: {
-    Card
+    Header,
+    BlackButton,
+    GameMusic
   }
+
 }
 </script>
+
+<style>
+body
+{
+  /* background image */
+}
+.nickname
+{
+  width: 950px;
+  margin-top: 8%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.joinButton
+{
+  margin-top: 30px;
+  text-align: center;
+}
+.createButton
+{
+  margin-top: 10px;
+  text-align: center;
+}
+</style>

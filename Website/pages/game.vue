@@ -2,7 +2,7 @@
   <div class="container">
     <div class="tile is-ancestor">
       <div class="tile is-parent is-8">
-        <article class="tile is-child box"><!-- QUESTION TILE -->
+        <article class="tile is-child box border"><!-- QUESTION TILE -->
           <p class="title" id="questionNumber">Question 000</p>
           <p class="subtitle" id="questionTopic">Difficulty: --- <br>Topic: --- <br/></p>
           <div class="content">
@@ -11,47 +11,43 @@
         </article>
       </div>
       <div class="tile is-parent is-vertical"> <!-- SCORE AND LIFELINE TILES -->
-        <article class="tile is-child box">
-          <p class="title centered">Lifelines</p>
-          <p class="subtitle">Need some help? This is the place!</p>
-          <div class="buttons">
-            <b-button class="tile is-vertical large field is-grouped is-danger">50/50</b-button>
-            <b-button class="tile is-vertical large field is-grouped is-danger">Skip Question</b-button>
+        <article class="tile is-child box border">
+          <p class="title is-centered">Lifelines</p>
+          <p class="subtitle is-centered">Need some help? This is the place!</p>
+          <div class="buttons is-centered">
+            <b-button class="lifeline is-yellow">50/50</b-button>
+            <b-button class="lifeline is-yellow">Skip Question</b-button>
           </div>
         </article>
-        <article class="tile is-child box">
-          <p class="title" id="playerPosition">---</p>
-          <p class="subtitle" id="playerScore">Score: ---</p>
+        <article class="tile is-child box border">
+          <p class="title is-centered" id="playerPosition">---</p>
+          <p class="subtitle is-centered" id="playerScore">Score: ---</p> 
         </article>
       </div>
     </div>
     <div class="tile is-ancestor">
       <div class="tile is-parent is-vertical buttons">
-        <b-button @click="checkAnswer('ansOne')" class="tile answerButton is-child is-primary">
+        <b-button @click="checkAnswer('ansOne')" class="tile is-size-3-tablet is-child field is-grouped is-white">
           <p class="is-size-3-tablet answerLabel" id="ansOne">----</p>
         </b-button>
-        <b-button @click="checkAnswer('ansTwo')" class="tile answerButton is-child is-primary">
+        <b-button @click="checkAnswer('ansTwo')" class="tile is-size-3-tablet is-child field is-grouped is-white">
           <p class="is-size-3-tablet answerLabel" id="ansTwo">----</p>
         </b-button>
       </div>
       <div class="tile is-parent is-vertical buttons">
-        <b-button @click="checkAnswer('ansThree')" class="tile answerButton is-child is-primary">
+        <b-button @click="checkAnswer('ansThree')" class="tile is-size-3-tablet is-child field is-grouped is-white">
           <p class="is-size-3-tablet answerLabel" id="ansThree">----</p>
         </b-button>
-        <b-button @click="checkAnswer('ansFour')" class="tile answerButton is-child is-primary">
+        <b-button @click="checkAnswer('ansFour')" class="tile is-size-3-tablet is-child field is-grouped is-white">
           <p class="is-size-3-tablet answerLabel" id="ansFour">----</p>
         </b-button>
       </div>
       <div class="tile is-parent is-4"> <!-- LEADERBOARD TILE -->
-        <article class="tile is-child box">
-          <p class="subtitle">Wondering how your competitors are doing? This is the place for you 👀</p>
+        <article class="tile is-child box border">
+          <p class="subtitle is-centered">Wondering how your competitors are doing? This is the place for you 👀</p>
           <div class="message">
             <div class="message-header">
               <p>Leaderboard</p>
-              <b-button class="button" type="is-primary" @click="refreshLeaderboard">
-                <b-icon class="icon" pack="mdi" icon="refresh">
-                </b-icon>
-              </b-button>
             </div>
             <div class="message-body">
               <b-table
@@ -190,21 +186,23 @@ export default {
       }).then((res) => res.json());
       console.info(response);
     },
-    updatePlayerScoreAndPos(adjustment) {
-      this.score += adjustment;
+      });
+      console.info(response);
+    },
+    async updatePlayerScoreAndPos(adjustment) {
+      if (adjustment == 0) {
+        this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json());
+        this.score = this.findCurrentPlayer(false);
+      }
+      else {
+        this.score += adjustment;
+        this.updatePlayerTable();
+        this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json);
+      }
       document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;
-      this.refreshLeaderboard();
-      this.updatePlayerTable();
       // this.tableData.push({id: 5050, lifeline5050: true, lifelineSkip: true, lobbyId: 90909090, name: "bethany", score: this.score, questionIndex: this.currQuestion}); // TEMPORARY FIX !! TODO: REMOVE THIS LATER after full API integration
       this.tableData.sort((a,b) => b.score - a.score);
-      let playerPos = 0;
-      for (playerPos=0; playerPos < this.tableData.length; playerPos++) {
-        console.info("in player loop!");
-        if (this.tableData[playerPos].name === this.nickname) {
-            break;
-        }
-      }
-      playerPos++;
+      let playerPos = this.findCurrentPlayer(true);
       let positionElem = document.getElementById("playerPosition");
       console.info(`Player position: ${playerPos}`);
       switch (playerPos) {
@@ -222,14 +220,24 @@ export default {
           break;
       }
     },
+    findCurrentPlayer(position) {
+      for (let playerPos=0; playerPos < this.tableData.length; playerPos++) {
+        console.info("in player loop!");
+        if (this.tableData[playerPos].name === this.nickname) {
+            if (position) {
+              playerPos++;
+              return playerPos;
+            }
+            else {
+              return this.tableData[playerPos].score;
+            }
+        }
+      }
+    },
     getNextQuestion() {
       this.currQuestion++;
       this.updatePlayerTable();
       this.loadQs();
-    },
-    async refreshLeaderboard() {
-      this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json());
-      console.info(this.tableData);
     },
     async getQs() {
       this.lobbyInfo = await fetch(`/quizApi/Lobbies/${this.lobbyInfo.id}`).then((res) => res.json());
@@ -275,6 +283,8 @@ export default {
       }
       else if (this.currQuestion == 30) { // TODO: end of game
         alert("Game over!");
+      if (this.currQuestion == 6) { // TODO: end of game
+        document.location.href = "http://localhost:3000/results";
         const allAnsButtons = document.getElementsByClassName("answerButton");
         let ansButton;
         for (ansButton of allAnsButtons) {
@@ -320,6 +330,7 @@ export default {
 
 </script>
 
+
 <style lang="scss">
   $warning: #ffba49;
   $link: #20a39e;
@@ -329,5 +340,29 @@ export default {
   .answerLabel {
       white-space: break-spaces;
 
+  }
+
+  .border{
+    border: 3px solid black;
+  }
+
+  .tile{
+    width: 100%;
+  }
+
+  .is-yellow{
+    background-color: #ffba49;
+    color: black;
+    text-align: center;
+  }
+
+  .lifeline{
+    width: 170px;
+    height: 100px;
+    font-size: 25px;;
+  }
+
+  .is-centered{
+    text-align: center;
   }
 </style>
