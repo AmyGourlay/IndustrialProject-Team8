@@ -13,6 +13,6 @@ namespace QuizAPI.Models
 		{
 		}
 
-		public DbSet<Player> LobbyItems { get; set; }
+		public DbSet<Player> PlayerItems { get; set; }
 	}
 }

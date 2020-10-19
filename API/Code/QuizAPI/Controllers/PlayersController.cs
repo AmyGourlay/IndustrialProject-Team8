@@ -358,7 +358,7 @@ namespace QuizAPI.Controllers
 
         private bool PlayerExists(int id)
         {
-            return _context.LobbyItems.Any(e => e.id == id);
+            return _context.PlayerItems.Any(e => e.id == id);
         }
     }
 }
