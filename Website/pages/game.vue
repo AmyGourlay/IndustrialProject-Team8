@@ -104,10 +104,13 @@
 </template>
 
 <script>
+
+//Setting thresholds for timer countdown animation
 const FULL_DASH_ARRAY = 283;
 const WARNING_THRESHOLD = 10;
 const ALERT_THRESHOLD = 5;
 
+//Setting colours for the timer countdown animation 
 const COLOR_CODES = {
   info: {
     color: "green"
@@ -122,6 +125,7 @@ const COLOR_CODES = {
   }
 };
 
+//Setting timer duration 
 const TIME_LIMIT = 30;
 
 export default {
@@ -434,12 +438,20 @@ export default {
     getRandomNum (min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     },
+    /*
+     *  When Timer Runs Out Function
+     *  If player has not answered q before timer runs out, deduct 500 points, set streak to 0, load next q
+     */
     onTimesUp() {
       clearInterval(this.timerInterval);
-      this.updatePlayerScoreAndPos(0);
+      this.updatePlayerScoreAndPos(-500);
       this.getNextQuestion();
       this.streak == 0;
     },
+    /*
+     *  Start Timer Function
+     *  Sets time passed to 0, clears the interval and restarts the timer, called when a new question is loaded
+     */
     startTimer() {
       this.timePassed = 0;
       clearInterval(this.timerInterval);
@@ -448,31 +460,45 @@ export default {
 
   },
   computed: {
+    /*
+     *  Function to animate the countdown
+     */
     circleDasharray() {
       return `${(this.timeFraction * FULL_DASH_ARRAY).toFixed(0)} 283`;
     },
-
+    /*
+     *  Function to format the timer
+     */
     formattedTimeLeft() {
       const timeLeft = this.timeLeft;
       const minutes = Math.floor(timeLeft / 60);
       let seconds = timeLeft % 60;
 
       if (seconds < 10) {
-        seconds = `0${seconds}`;
+        seconds = `0${seconds}`; //If timer has <10s to go, prefix with a 0
       }
 
       return `${minutes}:${seconds}`;
     },
 
+    /*
+     *  Function to return the time left on the timer
+     */
     timeLeft() {
       return TIME_LIMIT - this.timePassed;
     },
 
+    /*
+     *  Function to reduce the length of the ring gradually during the countdown to ensure animation reaches 0
+     */
     timeFraction() {
       const rawTimeFraction = this.timeLeft / TIME_LIMIT;
       return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
     },
 
+    /*
+     *  Function to return the correct colour for the countdown animation
+     */
     remainingPathColor() {
       const { alert, warning, info } = COLOR_CODES;
 
@@ -487,6 +513,9 @@ export default {
   },
 
   watch: {
+    /*
+     *  Function that calls onTimesUp() when timer reaches 0
+     */
     timeLeft(newValue) {
       if (newValue === 0) {
         this.onTimesUp();
