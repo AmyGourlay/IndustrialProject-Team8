@@ -27,24 +27,23 @@
     </div>
     <div class="tile is-ancestor">
       <div class="tile is-parent is-vertical buttons">
-        <b-button @click="checkAnswer('ansOne')" class="tile is-size-3-tablet is-child field is-grouped is-white">
-          <p class="is-size-3-tablet answerLabel" id="ansOne">----</p>
+        <b-button @click="checkAnswer('ansOne')" class="tile is-child border is-white answerButton">
+          <p class="is-size-2-tablet answerLabel" id="ansOne">----</p>
         </b-button>
-        <b-button @click="checkAnswer('ansTwo')" class="tile is-size-3-tablet is-child field is-grouped is-white">
-          <p class="is-size-3-tablet answerLabel" id="ansTwo">----</p>
+        <b-button @click="checkAnswer('ansTwo')" class="tile is-child border is-white answerButton">
+          <p class="is-size-2-tablet answerLabel" id="ansTwo">----</p>
         </b-button>
       </div>
       <div class="tile is-parent is-vertical buttons">
-        <b-button @click="checkAnswer('ansThree')" class="tile is-size-3-tablet is-child field is-grouped is-white">
-          <p class="is-size-3-tablet answerLabel" id="ansThree">----</p>
+        <b-button @click="checkAnswer('ansThree')" class="tile is-child border is-white answerButton">
+          <p class="is-size-2-tablet answerLabel" id="ansThree">----</p>
         </b-button>
-        <b-button @click="checkAnswer('ansFour')" class="tile is-size-3-tablet is-child field is-grouped is-white">
-          <p class="is-size-3-tablet answerLabel" id="ansFour">----</p>
+        <b-button @click="checkAnswer('ansFour')" class="tile is-child border is-white answerButton">
+          <p class="is-size-2-tablet answerLabel" id="ansFour">----</p>
         </b-button>
       </div>
       <div class="tile is-parent is-4"> <!-- LEADERBOARD TILE -->
         <article class="tile is-child box border">
-          <p class="subtitle is-centered">Wondering how your competitors are doing? This is the place for you 👀</p>
           <div class="message">
             <div class="message-header">
               <p>Leaderboard</p>
@@ -284,7 +283,7 @@ export default {
     getNextQuestion() {
       this.currQuestion++;
       this.updatePlayerTable();
-      this.loadQs();
+      this.loadQs(false);
     },
     /*
      *  Get Questions from Open Trivia DB API function
@@ -324,7 +323,7 @@ export default {
         this.decodeJsonData(false);
       }
 
-      this.loadQs();
+      this.loadQs(true);
     },
     /*
      *  Send Questions to the Question table function
@@ -421,19 +420,21 @@ export default {
      *  It decodes the question data, updates the question field as well as the difficulty, the topic and the question number fields.
      *  TODO: this function should load the player's question index from the DB
      */
-    async loadQs() {
-      let request = {
-        name: this.nickname,
-        lobbyId: this.lobbyInfo.id
-      };
-      let playerInfo = await fetch(`/quizApi/Players/getInfo`, {                 // the POST request to get the player info so we can find the question the player is up to
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8'
-        },
-        body: JSON.stringify(request)
-      }).then((res) => res.json());
-      this.currQuestion = playerInfo.questionIndex;
+    async loadQs(firstLoad) {
+      if (firstLoad) {  // if it's the first time that it's loading the game
+        let request = {
+          name: this.nickname,
+          lobbyId: this.lobbyInfo.id
+        };
+        let playerInfo = await fetch(`/quizApi/Players/getInfo`, {                 // the POST request to get the player info so we can find the question the player is up to
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+          },
+          body: JSON.stringify(request)
+        }).then((res) => res.json());
+        this.currQuestion = playerInfo.questionIndex;
+      }
       console.info(`current question: ${this.currQuestion - 1}`);
       if (this.currQuestion == 20) { // TODO: end of game
         alert("Game over!");
@@ -503,16 +504,13 @@ export default {
 
 
 <style lang="scss">
-  $warning: #ffba49;
-  $link: #20a39e;
-  $info: #a4a9ad;
-  $danger: #f9b1b1;
-  $primary: #23001e;
+
   .answerLabel {
       white-space: break-spaces;
-
   }
-
+  .answerButton {
+    border-color: black !important;
+  }
   .border{
     border: 3px solid black;
   }

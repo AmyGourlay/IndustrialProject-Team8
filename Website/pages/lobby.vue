@@ -1,15 +1,15 @@
 <template>
 
 
-    <section class="section is-fullheight">
-      <div class="column is-mobile is-centered">
+    <div class="section is-fullheight">
+      <div class="container column is-mobile is-centered is-8">
           <!--<b-button type="is-primary" @click="createLobby">
             <b-icon class="icon" pack="mdi" icon="refresh">
             </b-icon>
           </b-button>--> <!--////////////////FOR HOMEPAGE/////////////////-->
           <LobbyCodeLbl title="Players"></LobbyCodeLbl>
       </div>
-      <div class="column is-mobile is-centered">
+      <div class="container column is-mobile is-centered is-8">
         <b-table
                 :data="tableData"
                 :columns="tableColumns"
@@ -20,15 +20,15 @@
                 :paginationSimple="false"
               ></b-table>
       </div>
-      <div class="columns is-mobile is-centered is-gapless">
-        <div class="column is-3">
+      <div class="buttons is-mobile is-centered">
+        <div class="is-3">
           <router-link to="/game"><BlackButton title="Start Game" to="./game.vue"></BlackButton></router-link>
         </div>
-        <div class="column is-3">
+        <div class="is-3">
           <router-link to="/"><BlackButton title="Leave Game"></BlackButton></router-link>
         </div>
       </div>
-    </section>
+    </div>
 
 
 </template>
@@ -55,14 +55,15 @@ export default {
             {
                 field: 'name',
                 label: 'Nickname',
-                width: '40',
+                width: '150',
             },
             {
                 field: 'score',
                 label: 'Score',
                 numeric: true,
                 sortable: true,
-                centered: true
+                centered: true,
+                width: '100'
             }
         ],
       lobbyInfo: []
@@ -187,3 +188,7 @@ export default {
 }
 
 </script>
+
+<style>
+
+</style>

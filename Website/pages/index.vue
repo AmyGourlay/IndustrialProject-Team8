@@ -39,10 +39,6 @@ export default {
 </script>
 
 <style>
-body
-{
-  /* background image */
-}
 .nickname
 {
   width: 950px;
