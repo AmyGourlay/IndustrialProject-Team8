@@ -1,6 +1,4 @@
 <template>
-
-
     <div class="section is-fullheight">
       <div class="container column is-mobile is-centered is-8">
           <!--<b-button type="is-primary" @click="createLobby">
@@ -29,8 +27,6 @@
         </div>
       </div>
     </div>
-
-
 </template>
 
 <script>
@@ -70,6 +66,11 @@ export default {
     }
   },
   methods: {
+
+    /*
+     *  Get Game Details function
+     *  This function gets the player's info so that their score and details can be pulled from the database
+     */
     getGameDetails() {
       let allCookies = document.cookie;
       let cookieArr = allCookies.split('; ');
@@ -87,6 +88,11 @@ export default {
       this.nickname = nickname;
       return lobbyId;
     },
+
+    /*
+     *  Update Lobby Table function
+     *  Updates the database with the questions generated in the front end so players can pull that data when they want to play
+     */
     async updateLobbyTable() {
       let tempLobbyInfo = {
         id: this.lobbyInfo.id,
@@ -104,6 +110,12 @@ export default {
       console.info("IN UPDATE LOBBY");
       console.info(response);
     },
+
+    /*
+     *  Update Player Table function
+     *  Updates the database with the Player's info, such as their score, what question they're up to etc.
+     *  Currently, it sends everything back to the database, rather than just what needs updating.
+     */
     async updatePlayerTable(){
       let playerInfo = {
         name: this.nickname,
@@ -123,6 +135,15 @@ export default {
       }).then((res) => res.json());
       console.info(response);
     },
+
+    /*
+     *  Update Player Score and Position function
+     *
+     *  This function has two purposes - adjusting the player's score and updating the score, position and leaderboard elements.
+     *  If it is run at the start of the game, it will query the database for the current player's score and save that as their existing score.
+     *  otherwise, it will adjust their score locally and then update the database with the change and pull the latest changes from the database
+     *  It also updates the position shown on screen so the player knows where they place on the leaderboard
+     */
     updatePlayerScoreAndPos(adjustment) {
       this.score += adjustment;
       this.refreshLeaderboard();
@@ -155,26 +176,19 @@ export default {
           break;
       }
     },
+
     async refreshLeaderboard() {
       this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json());
       console.info(this.tableData);
-    },
-    decodeJsonData() {  // had issues with HTML encoding so this converts the Base64 encoded data back into ASCII
-      let tempVar = this.currQuestionJSON;
-      this.currQuestionJSON.category = decodeURIComponent(escape(window.atob(tempVar.category)));
-      this.currQuestionJSON.correct_answer = decodeURIComponent(escape(window.atob(tempVar.correct_answer)));
-      this.currQuestionJSON.difficulty = decodeURIComponent(escape(window.atob(tempVar.difficulty)));
-      this.currQuestionJSON.question = decodeURIComponent(escape(window.atob(tempVar.question)));
-      this.currQuestionJSON.type = decodeURIComponent(escape(window.atob(tempVar.type)));
-      let incorrectAnswers = [];
-      let answer;
-      for (answer of tempVar.incorrect_answers) {
-        incorrectAnswers.push(decodeURIComponent(escape(window.atob(answer))));
-      }
-      this.currQuestionJSON.incorrect_answers = incorrectAnswers;
-      console.info(this.currQuestionJSON);
-    },
+    }
   },
+
+  /*
+   *  The starting function!
+   *  This function is what is called when the page loads.
+   *  The lobby information is loaded locally from the database and the player's nickname and lobby ID field are updated on screen.
+   *  This function also gets the score and player info from the DB via update player score and position function.
+   */
   async fetch() {
     let lobbyId = this.getGameDetails();
     this.lobbyInfo = await fetch(`/quizApi/Lobbies/${lobbyId}`).then((res) => res.json());
@@ -186,6 +200,7 @@ export default {
     this.startGame();
   },
 }
+
 
 </script>
 
