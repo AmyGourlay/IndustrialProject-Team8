@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    
     <!--TIMER CODE TAKEN FROM https://medium.com/js-dojo/how-to-create-an-animated-countdown-timer-with-vue-89738903823f-->
       <div class="base-timer">
         <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -167,6 +168,7 @@ export default {
     }
   },
   methods: {
+
     /*
      *  Start Game function
      *  Starts the whole game process off. Runs once, takes no parameters.
@@ -175,6 +177,7 @@ export default {
       console.log("YAY");
       this.getQs();
     },
+
     /*
      *  Get Game Details function
      *  This function gets the player's info so that their score and details can be pulled from the database
@@ -196,6 +199,7 @@ export default {
       this.nickname = nickname;
       return lobbyId;
     },
+
     /*
      *  Check Answer function
      *  Called when the player clicks any of the four answer buttons, it checks if the button pressed contained the correct answer to the
@@ -216,6 +220,7 @@ export default {
       }
       this.getNextQuestion();
     },
+
     /*
      *  Update Lobby Table function
      *  Updates the database with the questions generated in the front end so players can pull that data when they want to play
@@ -238,6 +243,7 @@ export default {
       console.info("IN UPDATE LOBBY");
       console.info(response);
     },
+
     /*
      *  Update Player Table function
      *  Updates the database with the Player's info, such as their score, what question they're up to etc.
@@ -262,6 +268,7 @@ export default {
       }).then((res) => res.json());
       console.info(response);
     },
+
     /*
      *  Update Player Score and Position function
      *
@@ -307,6 +314,7 @@ export default {
           break;
       }
     },
+
     /*
      *  Find Current Player in the Table function
      *  This function finds the player's data in the latest version of the data pulled from the database.
@@ -326,6 +334,7 @@ export default {
         }
       }
     },
+
     /*
      *  Get Next Question function
      *  This function simply gets the next question by iterating the player's question index that is locally stored. It updates the data in the Player table and then loads the new question.
@@ -335,6 +344,7 @@ export default {
       this.updatePlayerTable();
       this.loadQs();
     },
+
     /*
      *  Get Questions from Open Trivia DB API function
      *  This function loads the questions from either the Open Trivia DB or from the Database.
@@ -354,9 +364,9 @@ export default {
       this.mediumQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=medium&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results);
       this.hardQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=hard&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results);*/
       console.info("Base64 questions");
-
       this.loadQs();
     },
+
     /*
      *  Decode JSON Data function
      *  This function is responsible for decoding the Base64. It decodes them and stores it in the currQuestionJSON object which stores the JSON data of the current question.
@@ -376,6 +386,7 @@ export default {
       this.currQuestionJSON.incorrect_answers = incorrectAnswers;
       console.info(this.currQuestionJSON);
     },
+
     /*
      *  Load Current Question function
      *  This function loads the current question - so it loads the data into the currQuestionJSON object from the lobbyInfo object.
@@ -410,6 +421,7 @@ export default {
       document.getElementById("questionBox").innerHTML = this.currQuestionJSON.question;  // updates the question box and shows the question to the player
       this.updateQuestion();
     },
+
     /*
      *  Update Question Buttons function
      *  This function updates the answwwer buttons by randomly selecting one of them to be the correct answer and then populating the remaining buttons with incorrect answers
@@ -430,6 +442,7 @@ export default {
       }
       this.startTimer();
     },
+
     /*
      *  Get a random number function
      *  This simply generates a random number between the given range and returns it.
@@ -438,6 +451,7 @@ export default {
     getRandomNum (min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     },
+
     /*
      *  When Timer Runs Out Function
      *  If player has not answered q before timer runs out, deduct 500 points, set streak to 0, load next q
@@ -448,6 +462,7 @@ export default {
       this.getNextQuestion();
       this.streak == 0;
     },
+
     /*
      *  Start Timer Function
      *  Sets time passed to 0, clears the interval and restarts the timer, called when a new question is loaded
@@ -460,12 +475,14 @@ export default {
 
   },
   computed: {
+
     /*
      *  Function to animate the countdown
      */
     circleDasharray() {
       return `${(this.timeFraction * FULL_DASH_ARRAY).toFixed(0)} 283`;
     },
+
     /*
      *  Function to format the timer
      */
@@ -513,6 +530,7 @@ export default {
   },
 
   watch: {
+
     /*
      *  Function that calls onTimesUp() when timer reaches 0
      */
@@ -522,6 +540,7 @@ export default {
       }
     }
   },
+
   /*
    *  The starting function!
    *  This function is what is called when the page loads.
