@@ -311,7 +311,7 @@ namespace QuizAPI.Controllers
                 data.Close();
                 cmd.Dispose();
                 cnn.Close();
-                return NotFound("Could not find a lobby with id " + lobbyId);
+                return NotFound("Could not find any questions with lobby id " + lobbyId);
             }
 
             data.Close();
