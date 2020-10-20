@@ -356,6 +356,38 @@ namespace QuizAPI.Controllers
             return Ok("Player deleted");
         }
 
+        // DELETE: api/Players/inlobby/[id]
+        // DELETE ALL PLAYERS FROM A LOBBY
+        [HttpDelete("inlobby/{lobbyId}")]
+        public async Task<ActionResult<Player>> DeleteAllPlayersInLobby(int lobbyId)
+        {
+            string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
+            SqlConnection cnn = new SqlConnection(connetionString);
+            SqlCommand cmd = new SqlCommand("SELECT * FROM player WHERE lobbyId=" + lobbyId + ";", cnn);
+
+            cnn.Open();
+            SqlDataReader data = cmd.ExecuteReader();
+
+            if (data.HasRows == false)
+            {
+                data.Close();
+                cmd.Dispose();
+                cnn.Close();
+                return NotFound("Could not find a lobby with id " + lobbyId);
+            }
+
+            data.Close();
+            cmd.Dispose();
+
+            cmd = new SqlCommand("DELETE FROM player WHERE lobbyId = " + lobbyId + ";", cnn);
+            cmd.ExecuteNonQuery();
+
+            cmd.Dispose();
+            cnn.Close();
+
+            return Ok("All players in the lobby has been deleted");
+        }
+
         private bool PlayerExists(int id)
         {
             return _context.PlayerItems.Any(e => e.id == id);
