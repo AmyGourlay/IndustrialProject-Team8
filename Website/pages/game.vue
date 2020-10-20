@@ -215,7 +215,7 @@ export default {
       }
       else {
         alert("Wrong answer! ❌");
-        this.streak==1;
+        this.streak==0;
         this.updatePlayerScoreAndPos(-500);
       }
       this.getNextQuestion();
