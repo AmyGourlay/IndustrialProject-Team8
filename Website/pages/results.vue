@@ -177,6 +177,7 @@ export default {
     async refreshLeaderboard() {
       this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json());
       console.info(this.tableData);
+    }
   },
 
   /*
@@ -195,7 +196,6 @@ export default {
     this.updatePlayerScoreAndPos(0);
     this.startGame();
   },
-}
 }
 
 </script>
