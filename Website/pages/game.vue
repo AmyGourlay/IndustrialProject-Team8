@@ -78,8 +78,8 @@
                 :columns="tableColumns"
                 :perPage="5"
                 paginated
-                default-sort="score"
                 default-sort-direction="desc"
+                default-sort="score"
                 :paginationSimple="false"
               ></b-table>
             </div>
@@ -141,7 +141,6 @@ export default {
     return {
         tableData: [],
         currQuestion: 1,
-        currQuestionJSON: null,
         lifeline5050: true,
         lifelineSkip: true,
         nickname: "",
@@ -164,7 +163,8 @@ export default {
                 centered: true
             }
         ],
-      lobbyInfo: []
+      lobbyInfo: [],
+      allQuestions: [],
     }
   },
   methods: {
@@ -207,7 +207,7 @@ export default {
      */
     checkAnswer(buttonId) {
       console.info(document.getElementById(buttonId).innerHTML)
-      if (document.getElementById(buttonId).innerHTML == this.currQuestionJSON.correct_answer) {
+      if (document.getElementById(buttonId).innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
         alert("Correct answer! ✔");
         this.streak+=1;
         this.updatePlayerScoreAndPos(((30-(this.timePassed))*10)*(this.streak));
@@ -229,9 +229,7 @@ export default {
     async updateLobbyTable() {
       let tempLobbyInfo = {
         id: this.lobbyInfo.id,
-        easyQuestions: JSON.stringify(this.lobbyInfo.easyQuestions),
-        mediumQuestions: JSON.stringify(this.lobbyInfo.mediumQuestions),
-        hardQuestions: JSON.stringify(this.lobbyInfo.hardQuestions),
+        date: new Date().toISOString(),
       };
       const response = await fetch(`/quizApi/Lobbies/${this.lobbyInfo.id}`, {
         method: 'PUT',
@@ -265,7 +263,8 @@ export default {
           'Content-Type': 'application/json;charset=utf-8'
         },
         body: JSON.stringify(playerInfo)
-      }).then((res) => res.json());
+      });
+      console.info("update player table !!!");
       console.info(response);
     },
 
@@ -280,23 +279,30 @@ export default {
      *  TODO: a possible fix to the weird updating bug could be fetching the leaderboard, amending it with the player's new score and then updating the database with the new score.
      *     NB: This shouldn't affect how the leaderboard position function works
      *     (the issue is that the database doesn't get updated fast enough for it to show the new changes, so this would be a good way round that.)
-     *  TODO: This function also should set the player's question to whatever is stored in the database
      */
     async updatePlayerScoreAndPos(adjustment) {
       if (adjustment == 0) {
         this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json());
-        this.score = this.findCurrentPlayer(false);
+        this.score = this.findCurrentPlayer(false, this.tableData);
       }
       else {
         this.score += adjustment;
-        this.updatePlayerTable();
-        this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json);
+        console.info(`Player score is: ${this.score} !!!`);
+        let playerPos = 0;
+        let tempTable = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json()); //  fetch the latest version of the leaderboard and save it locally in a variable
+        playerPos = this.findCurrentPlayer(true, tempTable);                                                    //  get the position of the current player in the leaderboard
+        console.debug(tempTable);                                                                               //  DEBUG statements
+        console.info(`Element at : ${playerPos} !!!`);
+        console.debug(this.tableData);
+        console.info(`Got ${tempTable[playerPos].name}`);
+        tempTable[playerPos].score = this.score;                                                                //  update the player's score in the local copy of the database
+        this.tableData = tempTable;                                                                             //  update the table shown on screen
+        this.updatePlayerTable();                                                                               //  update the database with the new score ONLY
       }
-      document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;
-      document.getElementById("streak").innerHTML = `Streak: ${this.streak}`;
-      // this.tableData.push({id: 5050, lifeline5050: true, lifelineSkip: true, lobbyId: 90909090, name: "bethany", score: this.score, questionIndex: this.currQuestion}); // TEMPORARY FIX !! TODO: REMOVE THIS LATER after full API integration
-      this.tableData.sort((a,b) => b.score - a.score);
-      let playerPos = this.findCurrentPlayer(true);
+      document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;                                //  update the player's score on screen
+      document.getElementById("streak").innerHTML = `Streak: ${this.streak}`;                             
+      this.tableData.sort((a,b) => b.score - a.score);                                                          //  sort the table
+      let playerPos = this.findCurrentPlayer(true, this.tableData) + 1;                                         //  find the player's position on the leaderboard
       let positionElem = document.getElementById("playerPosition");
       console.info(`Player position: ${playerPos}`);
       switch (playerPos) {
@@ -320,16 +326,15 @@ export default {
      *  This function finds the player's data in the latest version of the data pulled from the database.
      *  It can be used to get the player's score or their position in the leaderboard
      */
-    findCurrentPlayer(position) {
-      for (let playerPos=0; playerPos < this.tableData.length; playerPos++) {
+    findCurrentPlayer(position, tempTable) {
+      for (let playerPos=0; playerPos < tempTable.length; playerPos++) {
         console.info("in player loop!");
-        if (this.tableData[playerPos].name === this.nickname) {
+        if (tempTable[playerPos].name === this.nickname) {
             if (position) {
-              playerPos++;
               return playerPos;
             }
             else {
-              return this.tableData[playerPos].score;
+              return tempTable[playerPos].score;
             }
         }
       }
@@ -352,60 +357,153 @@ export default {
      *  Otherwise, it will just continue to load the question the player is currently on. (as the questions will be stored in the lobbyInfo object pulled from the DB)
      */
     async getQs() {
-      this.lobbyInfo = await fetch(`/quizApi/Lobbies/${this.lobbyInfo.id}`).then((res) => res.json());
+      let noData = false;
+      let response = await fetch(`/quizApi/Questions/inlobby/${this.lobbyInfo.id}`).then((res) => res.json()).catch((error) => noData = true);
       console.info("IN HERE");
-      if (this.lobbyInfo.easyQuestions === "" || this.lobbyInfo.mediumQuestions === "" || this.lobbyInfo.hardQuestions === "") { // checks the DB lobby data to see if questions have already been generated, if not, it generates them
-        this.lobbyInfo.easyQuestions = await fetch(`/getQuestions/amount=10&category=9&difficulty=easy&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
-        this.lobbyInfo.mediumQuestions = await fetch(`/getQuestions/amount=10&category=9&difficulty=medium&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
-        this.lobbyInfo.hardQuestions = await fetch(`/getQuestions/amount=10&category=9&difficulty=hard&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
-        this.updateLobbyTable();
+      if (!noData) { console.info(response); }
+      if (noData) { // checks the DB lobby data to see if questions have already been generated, if not, it generates them
+        let easyQSelector = this.getRandomNum(10,30);   // pick a random category from the list
+        let medQSelector = this.getRandomNum(10,30);
+
+        while (easyQSelector == 29 || easyQSelector == 20 ) { // while the category is not Mythology or General Knowledge
+          easyQSelector = this.getRandomNum(10,30);   // pick a different category
+        }
+        while (medQSelector == 29 || medQSelector == 20 || medQSelector == easyQSelector) { // does the same as above, but makes sure that the category is different to above.
+          medQSelector = this.getRandomNum(10,30);
+        }
+        console.info(easyQSelector);
+        console.info(medQSelector);
+
+        this.allQuestions.push.apply(this.allQuestions, await fetch(`/getQuestions/amount=6&category=${easyQSelector}&difficulty=easy&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results)); // using the tokens to get the questions via the API
+        this.allQuestions.push.apply(this.allQuestions, await fetch(`/getQuestions/amount=8&category=${medQSelector}&difficulty=medium&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results)); // using the tokens to get the questions via the API
+        this.allQuestions.push.apply(this.allQuestions, await fetch(`/getQuestions/amount=6&category=9&difficulty=hard&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results)); // using the tokens to get the questions via the API
+        this.sendQuestions();
+
+        this.decodeJsonData(true);
       }
-      /*this.easyQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=easy&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
-      this.mediumQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=medium&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results);
-      this.hardQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=hard&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results);*/
-      console.info("Base64 questions");
+      else {  // if not, we just need to decode them!
+        console.info("we got questions at home !");
+        this.allQuestions = response;
+        console.info(this.allQuestions);
+        this.decodeJsonData(false);
+      }
       this.loadQs();
     },
 
     /*
-     *  Decode JSON Data function
-     *  This function is responsible for decoding the Base64. It decodes them and stores it in the currQuestionJSON object which stores the JSON data of the current question.
+     *  Send Questions to the Question table function
+     *  This function is responsible for inserting the new questions for a lobby into the question table
      */
-    decodeJsonData() {  // had issues with HTML encoding so this converts the Base64 encoded data back into ASCII
-      let tempVar = this.currQuestionJSON;
-      this.currQuestionJSON.category = decodeURIComponent(escape(window.atob(tempVar.category)));
-      this.currQuestionJSON.correct_answer = decodeURIComponent(escape(window.atob(tempVar.correct_answer)));
-      this.currQuestionJSON.difficulty = decodeURIComponent(escape(window.atob(tempVar.difficulty)));
-      this.currQuestionJSON.question = decodeURIComponent(escape(window.atob(tempVar.question)));
-      this.currQuestionJSON.type = decodeURIComponent(escape(window.atob(tempVar.type)));
-      let incorrectAnswers = [];
-      let answer;
-      for (answer of tempVar.incorrect_answers) {
-        incorrectAnswers.push(decodeURIComponent(escape(window.atob(answer))));
+    async sendQuestions() {
+      let request = this.reformatQuestions(this.allQuestions);
+      const response = await fetch(`/quizApi/Questions/list`, {                 // the POST request to push our array of Question objects
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(request)
+      });
+      console.info("response!");
+      console.info(response);
+    },
+    /*
+     *  Reformat Questions into the API format
+     *  This function takes the data that the Open Trivia DB sends and converts it into a format that the API understands
+     */
+    reformatQuestions(questionArr) {
+      let result = [];                                                                                                                     // this is the data structure that will be sending the questions to the API
+      let questionIndex = 1;                                                    // used to include question numbers with each questions
+      let question;                                                             // used in the for loop to iterate through the tempQuestions array
+      let reqQuestion;                                                          // used in the for loop to temporarily store the question in the accepted format for the API
+      console.info("in reformat questions!!")
+      for (question of questionArr) {
+        console.info("in for loop!");
+        reqQuestion = question;
+        reqQuestion.questionIndex = questionIndex;
+        questionIndex++;
+        reqQuestion.lobbyId = this.lobbyInfo.id;                                // save the question number and correct answer to each question as well as the lobby ID
+        reqQuestion.correctAnswer = question.correct_answer;
+
+        for (let i = 0; i < reqQuestion.incorrect_answers.length; i++) {        // loops through the incorrect answer array and saves them as individual variables for the API to understand
+          let propertyName = "incorrectAnswer" + (i+1);
+          reqQuestion[propertyName] = reqQuestion.incorrect_answers[i];
+        }
+        delete(reqQuestion.correct_answer);
+        delete(reqQuestion.incorrect_answers);
+        result.push(reqQuestion);
       }
-      this.currQuestionJSON.incorrect_answers = incorrectAnswers;
-      console.info(this.currQuestionJSON);
+      return result;
+    },
+    /*
+     *  Decode JSON Data function
+     *  This function is responsible for decoding the Base64. It is run after we pull the questions from the DB, so it decodes each question and returns it
+     *  to it's original format for the frontend to read and process easily.
+     */
+    decodeJsonData(newData) {  // had issues with HTML encoding so this converts the Base64 encoded data back into ASCII
+      let question;
+      if (newData) {  // decoding data from Open Trivia API
+        for (question of this.allQuestions) {
+          question.category = decodeURIComponent(escape(window.atob(question.category)));
+          question.correct_answer = decodeURIComponent(escape(window.atob(question.correct_answer)));
+          question.difficulty = decodeURIComponent(escape(window.atob(question.difficulty)));
+          question.question = decodeURIComponent(escape(window.atob(question.question)));
+          question.type = decodeURIComponent(escape(window.atob(question.type)));
+          for (let i = 0; i < 3; i++) {
+            question.incorrect_answers[i] = decodeURIComponent(escape(window.atob(question.incorrect_answers[i])));
+          }
+        }
+        console.info("data from Open trivia DBBB !!!");
+        console.info(this.allQuestions);
+      }
+      else {  // decoding data from DB
+        console.info("decoding DB DATA !!!");
+        console.info(this.allQuestions);
+        for (question of this.allQuestions) {
+          question.category = decodeURIComponent(escape(window.atob(question.category)));
+          question.correct_answer = decodeURIComponent(escape(window.atob(question.correctAnswer)));
+          question.difficulty = decodeURIComponent(escape(window.atob(question.difficulty)));
+          question.question = decodeURIComponent(escape(window.atob(question.question)));
+          question.type = decodeURIComponent(escape(window.atob(question.type)));
+          delete question.correctAnswer;
+          let incorrectAnswers = [];
+          let answer;
+          for (let i = 0; i < 3; i++) {
+            let propertyName = "incorrectAnswer" + (i+1);
+            incorrectAnswers.push(decodeURIComponent(escape(window.atob(question[propertyName]))));
+            delete question[propertyName];
+          }
+          question.incorrect_answers = incorrectAnswers;
+        }
+        console.info("data from DB !!!");
+        console.info(this.allQuestions);
+
+      }
     },
 
     /*
      *  Load Current Question function
      *  This function loads the current question - so it loads the data into the currQuestionJSON object from the lobbyInfo object.
      *  It decodes the question data, updates the question field as well as the difficulty, the topic and the question number fields.
+     *  TODO: this function should load the player's question index from the DB
      */
-    loadQs() {
+    async loadQs() {
+      let request = {
+        name: this.nickname,
+        lobbyId: this.lobbyInfo.id
+      };
+      let playerInfo = await fetch(`/quizApi/Players/getInfo`, {                 // the POST request to get the player info so we can find the question the player is up to
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(request)
+      }).then((res) => res.json());
+      this.currQuestion = playerInfo.questionIndex;
       console.info(`current question: ${this.currQuestion - 1}`);
-      if (this.currQuestion < 10) {
-        this.currQuestionJSON = this.lobbyInfo.easyQuestions[this.currQuestion -1];
-      }
-      else if (this.currQuestion < 20) {
-        this.currQuestionJSON = this.lobbyInfo.mediumQuestions[this.currQuestion -10];
-      }
-      else if (this.currQuestion < 30) {
-        this.currQuestionJSON = this.lobbyInfo.hardQuestions[this.currQuestion -20];
-      }
-      else if (this.currQuestion == 30) { // TODO: end of game
+      if (this.currQuestion == 20) { // TODO: end of game
         alert("Game over!");
       }
+      /*
       if (this.currQuestion == 6) { // TODO: end of game
         document.location.href = "http://localhost:3000/results";
         const allAnsButtons = document.getElementsByClassName("answerButton");
@@ -414,11 +512,10 @@ export default {
           ansButton.disabled = true;
         }
         return 0;
-      }
-      this.decodeJsonData();
+      }*/
       document.getElementById("questionNumber").innerHTML = `Question ${this.currQuestion}`;  // updates the question number and the topic
-      document.getElementById("questionTopic").innerHTML = `Difficulty: ${this.currQuestionJSON.difficulty} <br>Topic: ${this.currQuestionJSON.category} </br>`
-      document.getElementById("questionBox").innerHTML = this.currQuestionJSON.question;  // updates the question box and shows the question to the player
+      document.getElementById("questionTopic").innerHTML = `Difficulty: ${this.allQuestions[this.currQuestion].difficulty} <br>Topic: ${this.allQuestions[this.currQuestion].category} </br>`
+      document.getElementById("questionBox").innerHTML = this.allQuestions[this.currQuestion].question;  // updates the question box and shows the question to the player
       this.updateQuestion();
     },
 
@@ -430,13 +527,13 @@ export default {
     updateQuestion() { // pick a random number between 1 and 4, this will be used to asign the correct answer to a button.
       const correctAnswer = this.getRandomNum(0,3);
       const answerLabels = document.getElementsByClassName("answerLabel");
-      answerLabels[correctAnswer].innerHTML = this.currQuestionJSON.correct_answer;
-      console.info(`correct answer - ${this.currQuestionJSON.correct_answer}`);
+      answerLabels[correctAnswer].innerHTML = this.allQuestions[this.currQuestion].correct_answer;
+      console.debug(`correct answer - ${this.allQuestions[this.currQuestion].correct_answer}`);
       let counter = 0;
       for (let i = 0; i < answerLabels.length; i++) { // assigns the other answers to the remaining buttons
-        if (answerLabels[i].innerHTML != this.currQuestionJSON.correct_answer) {
-          answerLabels[i].innerHTML = this.currQuestionJSON.incorrect_answers[counter];
-          console.info(`incorrect answer - ${this.currQuestionJSON.incorrect_answers[counter]}`);
+        if (answerLabels[i].innerHTML != this.allQuestions[this.currQuestion].correct_answer) {
+          answerLabels[i].innerHTML = this.allQuestions[this.currQuestion].incorrect_answers[counter];
+          console.debug(`incorrect answer - ${this.allQuestions[this.currQuestion].incorrect_answers[counter]}`);
           counter++;
         }
       }
