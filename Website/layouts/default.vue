@@ -79,5 +79,12 @@ border: 3px solid black;
   background-color: #20A39E;
   background-position: 0%, 0%, 50%, 50%;
   background-size: auto, cover;
+  min-height: 100%;
+  min-width: 1024px;
+  width: 100%;
+  height: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 </style>

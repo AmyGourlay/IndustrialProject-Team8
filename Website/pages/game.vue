@@ -1,5 +1,27 @@
 <template>
   <div class="container">
+    
+    <!--TIMER CODE TAKEN FROM https://medium.com/js-dojo/how-to-create-an-animated-countdown-timer-with-vue-89738903823f-->
+      <div class="base-timer">
+        <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <g class="base-timer__circle">
+            <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+            <path
+              :stroke-dasharray="circleDasharray"
+              class="base-timer__path-remaining"
+              :class="remainingPathColor"
+              d="
+                M 50, 50
+                m -45, 0
+                a 45,45 0 1,0 90,0
+                a 45,45 0 1,0 -90,0
+              "
+            ></path>
+          </g>
+        </svg>
+        <span class="base-timer__label">{{ formattedTimeLeft }}</span>
+      </div>
+
     <div class="tile is-ancestor">
       <div class="tile is-parent is-8">
         <article class="tile is-child box border"><!-- QUESTION TILE -->
@@ -22,6 +44,7 @@
         <article class="tile is-child box border">
           <p class="title is-centered" id="playerPosition">---</p>
           <p class="subtitle is-centered" id="playerScore">Score: ---</p>
+          <p class="subtitle is-centered" id="streak">---</p>
         </article>
       </div>
     </div>
@@ -82,6 +105,30 @@
 </template>
 
 <script>
+
+//Setting thresholds for timer countdown animation
+const FULL_DASH_ARRAY = 283;
+const WARNING_THRESHOLD = 10;
+const ALERT_THRESHOLD = 5;
+
+//Setting colours for the timer countdown animation 
+const COLOR_CODES = {
+  info: {
+    color: "green"
+  },
+  warning: {
+    color: "orange",
+    threshold: WARNING_THRESHOLD
+  },
+  alert: {
+    color: "red",
+    threshold: ALERT_THRESHOLD
+  }
+};
+
+//Setting timer duration 
+const TIME_LIMIT = 30;
+
 export default {
   name: 'Game',
   metaInfo: {
@@ -97,6 +144,10 @@ export default {
         lifeline5050: true,
         lifelineSkip: true,
         nickname: "",
+        streak: 0,
+        timePassed: 0,
+        timerInterval: null,
+
         score: 0,
         tableColumns: [
             {
@@ -117,6 +168,7 @@ export default {
     }
   },
   methods: {
+
     /*
      *  Start Game function
      *  Starts the whole game process off. Runs once, takes no parameters.
@@ -125,6 +177,7 @@ export default {
       console.log("YAY");
       this.getQs();
     },
+
     /*
      *  Get Game Details function
      *  This function gets the player's info so that their score and details can be pulled from the database
@@ -146,6 +199,7 @@ export default {
       this.nickname = nickname;
       return lobbyId;
     },
+
     /*
      *  Check Answer function
      *  Called when the player clicks any of the four answer buttons, it checks if the button pressed contained the correct answer to the
@@ -155,14 +209,18 @@ export default {
       console.info(document.getElementById(buttonId).innerHTML)
       if (document.getElementById(buttonId).innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
         alert("Correct answer! ✔");
-        this.updatePlayerScoreAndPos(500);
+        this.streak+=1;
+        this.updatePlayerScoreAndPos(((30-(this.timePassed))*10)*(this.streak));
+
       }
       else {
         alert("Wrong answer! ❌");
+        this.streak==0;
         this.updatePlayerScoreAndPos(-500);
       }
       this.getNextQuestion();
     },
+
     /*
      *  Update Lobby Table function
      *  Updates the database with the questions generated in the front end so players can pull that data when they want to play
@@ -183,6 +241,7 @@ export default {
       console.info("IN UPDATE LOBBY");
       console.info(response);
     },
+
     /*
      *  Update Player Table function
      *  Updates the database with the Player's info, such as their score, what question they're up to etc.
@@ -208,6 +267,7 @@ export default {
       console.info("update player table !!!");
       console.info(response);
     },
+
     /*
      *  Update Player Score and Position function
      *
@@ -240,6 +300,7 @@ export default {
         this.updatePlayerTable();                                                                               //  update the database with the new score ONLY
       }
       document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;                                //  update the player's score on screen
+      document.getElementById("streak").innerHTML = `Streak: ${this.streak}`;                             
       this.tableData.sort((a,b) => b.score - a.score);                                                          //  sort the table
       let playerPos = this.findCurrentPlayer(true, this.tableData) + 1;                                         //  find the player's position on the leaderboard
       let positionElem = document.getElementById("playerPosition");
@@ -259,6 +320,7 @@ export default {
           break;
       }
     },
+
     /*
      *  Find Current Player in the Table function
      *  This function finds the player's data in the latest version of the data pulled from the database.
@@ -277,6 +339,7 @@ export default {
         }
       }
     },
+
     /*
      *  Get Next Question function
      *  This function simply gets the next question by iterating the player's question index that is locally stored. It updates the data in the Player table and then loads the new question.
@@ -286,6 +349,7 @@ export default {
       this.updatePlayerTable();
       this.loadQs();
     },
+
     /*
      *  Get Questions from Open Trivia DB API function
      *  This function loads the questions from either the Open Trivia DB or from the Database.
@@ -323,9 +387,9 @@ export default {
         console.info(this.allQuestions);
         this.decodeJsonData(false);
       }
-
       this.loadQs();
     },
+
     /*
      *  Send Questions to the Question table function
      *  This function is responsible for inserting the new questions for a lobby into the question table
@@ -415,6 +479,7 @@ export default {
 
       }
     },
+
     /*
      *  Load Current Question function
      *  This function loads the current question - so it loads the data into the currQuestionJSON object from the lobbyInfo object.
@@ -453,6 +518,7 @@ export default {
       document.getElementById("questionBox").innerHTML = this.allQuestions[this.currQuestion].question;  // updates the question box and shows the question to the player
       this.updateQuestion();
     },
+
     /*
      *  Update Question Buttons function
      *  This function updates the answwwer buttons by randomly selecting one of them to be the correct answer and then populating the remaining buttons with incorrect answers
@@ -471,7 +537,9 @@ export default {
           counter++;
         }
       }
+      this.startTimer();
     },
+
     /*
      *  Get a random number function
      *  This simply generates a random number between the given range and returns it.
@@ -479,8 +547,97 @@ export default {
      */
     getRandomNum (min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
+    },
+
+    /*
+     *  When Timer Runs Out Function
+     *  If player has not answered q before timer runs out, deduct 500 points, set streak to 0, load next q
+     */
+    onTimesUp() {
+      clearInterval(this.timerInterval);
+      this.updatePlayerScoreAndPos(-500);
+      this.getNextQuestion();
+      this.streak == 0;
+    },
+
+    /*
+     *  Start Timer Function
+     *  Sets time passed to 0, clears the interval and restarts the timer, called when a new question is loaded
+     */
+    startTimer() {
+      this.timePassed = 0;
+      clearInterval(this.timerInterval);
+      this.timerInterval = setInterval(() => (this.timePassed += 1), 1000);
+    }
+
+  },
+  computed: {
+
+    /*
+     *  Function to animate the countdown
+     */
+    circleDasharray() {
+      return `${(this.timeFraction * FULL_DASH_ARRAY).toFixed(0)} 283`;
+    },
+
+    /*
+     *  Function to format the timer
+     */
+    formattedTimeLeft() {
+      const timeLeft = this.timeLeft;
+      const minutes = Math.floor(timeLeft / 60);
+      let seconds = timeLeft % 60;
+
+      if (seconds < 10) {
+        seconds = `0${seconds}`; //If timer has <10s to go, prefix with a 0
+      }
+
+      return `${minutes}:${seconds}`;
+    },
+
+    /*
+     *  Function to return the time left on the timer
+     */
+    timeLeft() {
+      return TIME_LIMIT - this.timePassed;
+    },
+
+    /*
+     *  Function to reduce the length of the ring gradually during the countdown to ensure animation reaches 0
+     */
+    timeFraction() {
+      const rawTimeFraction = this.timeLeft / TIME_LIMIT;
+      return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
+    },
+
+    /*
+     *  Function to return the correct colour for the countdown animation
+     */
+    remainingPathColor() {
+      const { alert, warning, info } = COLOR_CODES;
+
+      if (this.timeLeft <= alert.threshold) {
+        return alert.color;
+      } else if (this.timeLeft <= warning.threshold) {
+        return warning.color;
+      } else {
+        return info.color;
+      }
     }
   },
+
+  watch: {
+
+    /*
+     *  Function that calls onTimesUp() when timer reaches 0
+     */
+    timeLeft(newValue) {
+      if (newValue === 0) {
+        this.onTimesUp();
+      }
+    }
+  },
+
   /*
    *  The starting function!
    *  This function is what is called when the page loads.
@@ -536,4 +693,61 @@ export default {
   .is-centered{
     text-align: center;
   }
+
+    .base-timer {
+  position: fixed;
+  top: 960px;
+  left: 985px;
+  width: 100px;
+  height: 100px;
+  z-index: 2;
+  background-color: white;
+
+  &__svg {
+    transform: scaleX(-1);
+  }
+
+  &__circle {
+    fill: none;
+    stroke: none;
+  }
+
+  &__path-elapsed {
+    stroke-width: 7px;
+    stroke: grey;
+  }
+
+  &__path-remaining {
+    stroke-width: 7px;
+    stroke-linecap: round;
+    transform: rotate(90deg);
+    transform-origin: center;
+    transition: 1s linear all;
+    fill-rule: nonzero;
+    stroke: currentColor;
+
+    &.green {
+      color: rgb(65, 184, 131);
+    }
+
+    &.orange {
+      color: orange;
+    }
+
+    &.red {
+      color: red;
+    }
+  }
+
+  &__label {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+  }
+}
 </style>

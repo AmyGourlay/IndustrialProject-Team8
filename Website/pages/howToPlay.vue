@@ -16,8 +16,9 @@
 </template>
 
 <script>
-import GameMusic from '~/components/GameMusic'
-import BlackButton from '~/components/BlackButton'
+    import GameMusic from '~/components/GameMusic'
+    import BlackButton from '~/components/BlackButton'
+    
     export default {
         components: 
             {
