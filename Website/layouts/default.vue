@@ -1,6 +1,7 @@
 <template>
   <div class="background">
     <nav class="navbar" role="navigation" aria-label="main navigation">
+      <GameMusic />
       <!--<div class="columns is-4 is-offset-1 navbar-item">
         <div class="tile">
             <article class="tile is-child notification is-white">
