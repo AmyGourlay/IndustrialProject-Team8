@@ -68,9 +68,4 @@
     color: #24011E;
     opacity: 1;
 }
-.img
-{
-    margin-top: 30px;
-    margin-right: 70px;
-}
 </style>
