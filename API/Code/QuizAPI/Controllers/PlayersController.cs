@@ -64,9 +64,9 @@ namespace QuizAPI.Controllers
             return players;
         }
 
-        // GET: api/Players/getinfo
+        // POST: api/Players/getinfo
         // READ
-        [HttpGet("getinfo")]
+        [HttpPost("getinfo")]
         public async Task<ActionResult<Player>> GetPlayer(Player curPlayer)
         {
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
@@ -151,9 +151,9 @@ namespace QuizAPI.Controllers
             return players;
         }
 
-        // GET: api/Players/lifeline5050
+        // POST: api/Players/lifeline5050
         // READ LIFELINE5050
-        [HttpGet("lifeline5050")]
+        [HttpPost("lifeline5050")]
         public async Task<ActionResult<bool>> GetPlayerLifeline5050(Player curPlayer)
         {
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
@@ -181,9 +181,9 @@ namespace QuizAPI.Controllers
             return result;
         }
 
-        // GET: api/Players/lifelineSkip
+        // POST: api/Players/lifelineSkip
         // READ LIFELINESKIP
-        [HttpGet("lifelineSkip")]
+        [HttpPost("lifelineSkip")]
         public async Task<ActionResult<bool>> GetPlayerLifelineSkip(Player curPlayer)
         {
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
