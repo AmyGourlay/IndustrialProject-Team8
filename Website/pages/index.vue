@@ -1,6 +1,6 @@
 <template>
 <div>
-  <GameMusic />
+  <!--<GameMusic />-->
   <section class="section">
     <div class="columns is-mobile">
       <!--<Header></Header>-->
