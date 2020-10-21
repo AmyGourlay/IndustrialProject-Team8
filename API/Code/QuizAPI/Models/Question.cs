@@ -7,6 +7,7 @@ namespace QuizAPI.Models
 {
 	public class Question
 	{
+		//Model for records in the Question table
 		public int id { get; set; }
 		public string category { get; set; }
 		public string type { get; set; }
@@ -17,6 +18,6 @@ namespace QuizAPI.Models
 		public string incorrectAnswer2 { get; set; }
 		public string incorrectAnswer3 { get; set; }
 		public int questionIndex { get; set; }
-		public int lobbyId { get; set; }
+		public int lobbyId { get; set; } //foreign key from the Lobby table
 	}
 }
