@@ -1,32 +1,31 @@
 <template>
   <div class="container">
-    
-    <!--TIMER CODE TAKEN FROM https://medium.com/js-dojo/how-to-create-an-animated-countdown-timer-with-vue-89738903823f-->
-      <div class="base-timer">
-        <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <g class="base-timer__circle">
-            <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
-            <path
-              :stroke-dasharray="circleDasharray"
-              class="base-timer__path-remaining"
-              :class="remainingPathColor"
-              d="
-                M 50, 50
-                m -45, 0
-                a 45,45 0 1,0 90,0
-                a 45,45 0 1,0 -90,0
-              "
-            ></path>
-          </g>
-        </svg>
-        <span class="base-timer__label">{{ formattedTimeLeft }}</span>
-      </div>
-
     <div class="tile is-ancestor">
       <div class="tile is-parent is-8">
         <article class="tile is-child box border"><!-- QUESTION TILE -->
-          <p class="title" id="questionNumber">Question 000</p>
-          <p class="subtitle" id="questionTopic">Difficulty: --- <br>Topic: --- <br/></p>
+
+            <p class="title" id="questionNumber">Question 000</p>
+              <p class="subtitle" id="questionTopic">Difficulty: --- <br>Topic: --- <br/></p>
+            <!--TIMER CODE TAKEN FROM https://medium.com/js-dojo/how-to-create-an-animated-countdown-timer-with-vue-89738903823f-->
+              <div class="base-timer" >
+                <span id="timerLabel">{{ formattedTimeLeft }}</span>
+                <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                  <g class="base-timer__circle">
+                    <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+                    <path
+                      :stroke-dasharray="circleDasharray"
+                      class="base-timer__path-remaining"
+                      :class="remainingPathColor"
+                      d="
+                        M 50, 50
+                        m -45, 0
+                        a 45,45 0 1,0 90,0
+                        a 45,45 0 1,0 -90,0
+                      "
+                    ></path>
+                  </g>
+                </svg>
+              </div>
           <div class="content">
             <p class="is-size-3-tablet" id="questionBox"></p>
           </div>
@@ -51,18 +50,18 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent is-vertical buttons">
         <b-button @click="checkAnswer('ansOne')" class="tile is-child border is-white answerButton" id="ansOneA">
-          <p class="is-size-2-tablet answerLabel" id="ansOne">----</p>
+          <p class="is-size-3-tablet answerLabel" id="ansOne">----</p>
         </b-button>
         <b-button @click="checkAnswer('ansTwo')" class="tile is-child border is-white answerButton" id="ansTwoA">
-          <p class="is-size-2-tablet answerLabel" id="ansTwo">----</p>
+          <p class="is-size-3-tablet answerLabel" id="ansTwo">----</p>
         </b-button>
       </div>
       <div class="tile is-parent is-vertical buttons">
         <b-button @click="checkAnswer('ansThree')" class="tile is-child border is-white answerButton" id="ansThreeA">
-          <p class="is-size-2-tablet answerLabel" id="ansThree">----</p>
+          <p class="is-size-3-tablet answerLabel" id="ansThree">----</p>
         </b-button>
         <b-button @click="checkAnswer('ansFour')" class="tile is-child border is-white answerButton" id="ansFourA">
-          <p class="is-size-2-tablet answerLabel" id="ansFour">----</p>
+          <p class="is-size-3-tablet answerLabel" id="ansFour">----</p>
         </b-button>
       </div>
       <div class="tile is-parent is-4"> <!-- LEADERBOARD TILE -->
@@ -110,7 +109,7 @@ const FULL_DASH_ARRAY = 283;
 const WARNING_THRESHOLD = 10;
 const ALERT_THRESHOLD = 5;
 
-//Setting colours for the timer countdown animation 
+//Setting colours for the timer countdown animation
 const COLOR_CODES = {
   info: {
     color: "green"
@@ -125,7 +124,7 @@ const COLOR_CODES = {
   }
 };
 
-//Setting timer duration 
+//Setting timer duration
 const TIME_LIMIT = 30;
 
 export default {
@@ -404,7 +403,7 @@ export default {
         this.updatePlayerTable();                                                                               //  update the database with the new score ONLY
       }
       document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;                                //  update the player's score on screen
-      document.getElementById("streak").innerHTML = `Streak: ${this.streak}`;                             
+      document.getElementById("streak").innerHTML = `Streak: ${this.streak}`;
       this.tableData.sort((a,b) => b.score - a.score);                                                          //  sort the table
       let playerPos = this.findCurrentPlayer(true, this.tableData) + 1;                                         //  find the player's position on the leaderboard
       let positionElem = document.getElementById("playerPosition");
@@ -608,6 +607,13 @@ export default {
       console.info(`current question: ${this.currQuestion - 1}`);
       if (this.currQuestion == 20) { // TODO: end of game
         alert("Game over!");
+        window.location.href = "/results";
+        const allAnsButtons = document.getElementsByClassName("answerButton");
+        let ansButton;
+        for (ansButton of allAnsButtons) {
+          ansButton.disabled = true;
+        }
+        return 0;
       }
       /*
       if (this.currQuestion == 6) { // TODO: end of game
@@ -798,13 +804,13 @@ export default {
   }
 
     .base-timer {
-  position: fixed;
-  top: 960px;
-  left: 985px;
+  position: relative;
   width: 100px;
   height: 100px;
   z-index: 2;
   background-color: white;
+  display: flex;
+  float: right;
 
   &__svg {
     transform: scaleX(-1);
@@ -842,15 +848,17 @@ export default {
     }
   }
 
-  &__label {
+  #timerLabel {
     position: absolute;
     width: 100px;
     height: 100px;
-    top: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 40px;
+  }
+  #questionTopic {
+    display: flex;
   }
 }
 </style>
