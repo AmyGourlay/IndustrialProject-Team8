@@ -1,10 +1,6 @@
 <template>
   <div class="background">
-    <nav
-      class="navbar header"
-      role="navigation"
-      aria-label="main navigation"
-    >
+    <nav class="navbar" role="navigation" aria-label="main navigation">
       <!--<div class="columns is-4 is-offset-1 navbar-item">
         <div class="tile">
             <article class="tile is-child notification is-white">
@@ -19,23 +15,29 @@
             </article>
         </div>
       </div>-->
-      <div class="columns navbar-brand">
+      <div class="navbar-brand">
         <a class="navbar-item" href="/">
-          <h1>Quizz.io
-            <nobr class="subtitle">Lobby code:</nobr>
-            <nobr class="title" id="lobbyCode">----</nobr>
-            <nobr class="subtitle">Nickname:</nobr>
-            <nobr class="title" id="userNickname">----</nobr>
-          </h1>
-                
+          <h1 class="is-size-1-desktop title">Quizz.io</h1>
         </a>
-      </div>
+
+          <a class="navbar-item">
+            <p class="is-size-4-tablet" style="margin-right: 5px">Lobby code: </p>
+            <p class="is-size-4-tablet" id="lobbyCode">----</p>
+          </a>
+          <a class="navbar-item">
+            <p class="is-size-4-tablet" style="margin-right: 5px"> Nickname: </p>
+            <p class="is-size-4-tablet" id="userNickname">----</p>
+          </a>
+        </div>
+        <div class="navbar-end">
+          <div class="buttons is-centered" style="padding-right: 2rem">
+            <router-link to="/howToPlay"><b-button class="button" size="is-black is-large">How To Play</b-button></router-link>
+            <router-link to="/about"><b-button class="button" size="is-black is-large">About Us</b-button></router-link>
+          </div>
+        </div>
     </nav>
 
-    <div class="columns is-mobile is-centered">
-      <router-link to="/howToPlay"><b-button class="button" size="is-large">How To Play</b-button></router-link>
-      <router-link to="/about"><b-button class="button" size="is-large">About Us</b-button></router-link>
-    </div>
+
 
       <div class="container column is-10">
         <router-view></router-view>
@@ -43,41 +45,25 @@
   </div>
 </template>
 
-<style>
+
+<style lang="scss">
 
 .navbar {
-  background-color: transparent;
-}
-.navbar .navbar-brand {
-text-align: center;
-display: block;
-width: 50%;
-margin-top: 25px !important;
-margin: 0 auto;
-background-color: white;
-border: 3px solid black;
-}
-.navbar .navbar-brand > .navbar-item,
-.navbar .navbar-brand .navbar-link {
-  display: inline-block;
-  font-size: 100px;
-  padding-bottom: 20px;
-  color: black !important;
-}
-.button {
-  background-color: black;
-  color: white;
-  width: 250px;
-  height: 100px;
+  min-height: 6.25rem;
   text-align: center;
-  font-size: 50px;
+  width: 60%;
+  margin: auto;
+  background-color: white;
+  border: 3px solid black;
+  padding: 1rem;
+  margin-top: 1rem;
 }
-.background {
-  height: 100%;
-  width: 100%;
+html {
   background-image: url("~assets/Background.svg") !important;
   background-color: #20A39E;
   background-position: 0%, 0%, 50%, 50%;
-  background-size: auto, cover;
+  background-position-y: center;
+  background-attachment: fixed;
+  background-size: auto;
 }
 </style>

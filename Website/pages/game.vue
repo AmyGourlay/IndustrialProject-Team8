@@ -1,5 +1,27 @@
 <template>
   <div class="container">
+    
+    <!--TIMER CODE TAKEN FROM https://medium.com/js-dojo/how-to-create-an-animated-countdown-timer-with-vue-89738903823f-->
+      <div class="base-timer">
+        <svg class="base-timer__svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <g class="base-timer__circle">
+            <circle class="base-timer__path-elapsed" cx="50" cy="50" r="45"></circle>
+            <path
+              :stroke-dasharray="circleDasharray"
+              class="base-timer__path-remaining"
+              :class="remainingPathColor"
+              d="
+                M 50, 50
+                m -45, 0
+                a 45,45 0 1,0 90,0
+                a 45,45 0 1,0 -90,0
+              "
+            ></path>
+          </g>
+        </svg>
+        <span class="base-timer__label">{{ formattedTimeLeft }}</span>
+      </div>
+
     <div class="tile is-ancestor">
       <div class="tile is-parent is-8">
         <article class="tile is-child box border"><!-- QUESTION TILE -->
@@ -22,29 +44,29 @@
         <article class="tile is-child box border">
           <p class="title is-centered" id="playerPosition">---</p>
           <p class="subtitle is-centered" id="playerScore">Score: ---</p>
+          <p class="subtitle is-centered" id="streak">---</p>
         </article>
       </div>
     </div>
     <div class="tile is-ancestor">
       <div class="tile is-parent is-vertical buttons">
-        <b-button @click="checkAnswer('ansOne')" class="tile is-size-3-tablet is-child field is-grouped is-white">
-          <p class="is-size-3-tablet answerLabel" id="ansOne">----</p>
+        <b-button @click="checkAnswer('ansOne')" class="tile is-child border is-white answerButton">
+          <p class="is-size-2-tablet answerLabel" id="ansOne">----</p>
         </b-button>
-        <b-button @click="checkAnswer('ansTwo')" class="tile is-size-3-tablet is-child field is-grouped is-white">
-          <p class="is-size-3-tablet answerLabel" id="ansTwo">----</p>
+        <b-button @click="checkAnswer('ansTwo')" class="tile is-child border is-white answerButton">
+          <p class="is-size-2-tablet answerLabel" id="ansTwo">----</p>
         </b-button>
       </div>
       <div class="tile is-parent is-vertical buttons">
-        <b-button @click="checkAnswer('ansThree')" class="tile is-size-3-tablet is-child field is-grouped is-white">
-          <p class="is-size-3-tablet answerLabel" id="ansThree">----</p>
+        <b-button @click="checkAnswer('ansThree')" class="tile is-child border is-white answerButton">
+          <p class="is-size-2-tablet answerLabel" id="ansThree">----</p>
         </b-button>
-        <b-button @click="checkAnswer('ansFour')" class="tile is-size-3-tablet is-child field is-grouped is-white">
-          <p class="is-size-3-tablet answerLabel" id="ansFour">----</p>
+        <b-button @click="checkAnswer('ansFour')" class="tile is-child border is-white answerButton">
+          <p class="is-size-2-tablet answerLabel" id="ansFour">----</p>
         </b-button>
       </div>
       <div class="tile is-parent is-4"> <!-- LEADERBOARD TILE -->
         <article class="tile is-child box border">
-          <p class="subtitle is-centered">Wondering how your competitors are doing? This is the place for you 👀</p>
           <div class="message">
             <div class="message-header">
               <p>Leaderboard</p>
@@ -55,8 +77,8 @@
                 :columns="tableColumns"
                 :perPage="5"
                 paginated
-                default-sort="score"
                 default-sort-direction="desc"
+                default-sort="score"
                 :paginationSimple="false"
               ></b-table>
             </div>
@@ -82,6 +104,30 @@
 </template>
 
 <script>
+
+//Setting thresholds for timer countdown animation
+const FULL_DASH_ARRAY = 283;
+const WARNING_THRESHOLD = 10;
+const ALERT_THRESHOLD = 5;
+
+//Setting colours for the timer countdown animation 
+const COLOR_CODES = {
+  info: {
+    color: "green"
+  },
+  warning: {
+    color: "orange",
+    threshold: WARNING_THRESHOLD
+  },
+  alert: {
+    color: "red",
+    threshold: ALERT_THRESHOLD
+  }
+};
+
+//Setting timer duration 
+const TIME_LIMIT = 30;
+
 export default {
   name: 'Game',
   metaInfo: {
@@ -94,10 +140,13 @@ export default {
     return {
         tableData: [],
         currQuestion: 1,
-        currQuestionJSON: null,
         lifeline5050: true,
         lifelineSkip: true,
         nickname: "",
+        streak: 0,
+        timePassed: 0,
+        timerInterval: null,
+
         score: 0,
         tableColumns: [
             {
@@ -113,10 +162,12 @@ export default {
                 centered: true
             }
         ],
-      lobbyInfo: []
+      lobbyInfo: [],
+      allQuestions: [],
     }
   },
   methods: {
+
     /*
      *  Start Game function
      *  Starts the whole game process off. Runs once, takes no parameters.
@@ -125,6 +176,7 @@ export default {
       console.log("YAY");
       this.getQs();
     },
+
     /*
      *  Get Game Details function
      *  This function gets the player's info so that their score and details can be pulled from the database
@@ -146,6 +198,7 @@ export default {
       this.nickname = nickname;
       return lobbyId;
     },
+
     /*
      *  Check Answer function
      *  Called when the player clicks any of the four answer buttons, it checks if the button pressed contained the correct answer to the
@@ -153,16 +206,20 @@ export default {
      */
     checkAnswer(buttonId) {
       console.info(document.getElementById(buttonId).innerHTML)
-      if (document.getElementById(buttonId).innerHTML == this.currQuestionJSON.correct_answer) {
+      if (document.getElementById(buttonId).innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
         alert("Correct answer! ✔");
-        this.updatePlayerScoreAndPos(500);
+        this.streak+=1;
+        this.updatePlayerScoreAndPos(((30-(this.timePassed))*10)*(this.streak));
+
       }
       else {
         alert("Wrong answer! ❌");
+        this.streak==0;
         this.updatePlayerScoreAndPos(-500);
       }
       this.getNextQuestion();
     },
+
     /*
      *  Update Lobby Table function
      *  Updates the database with the questions generated in the front end so players can pull that data when they want to play
@@ -171,9 +228,7 @@ export default {
     async updateLobbyTable() {
       let tempLobbyInfo = {
         id: this.lobbyInfo.id,
-        easyQuestions: JSON.stringify(this.lobbyInfo.easyQuestions),
-        mediumQuestions: JSON.stringify(this.lobbyInfo.mediumQuestions),
-        hardQuestions: JSON.stringify(this.lobbyInfo.hardQuestions),
+        date: new Date().toISOString(),
       };
       const response = await fetch(`/quizApi/Lobbies/${this.lobbyInfo.id}`, {
         method: 'PUT',
@@ -185,6 +240,7 @@ export default {
       console.info("IN UPDATE LOBBY");
       console.info(response);
     },
+
     /*
      *  Update Player Table function
      *  Updates the database with the Player's info, such as their score, what question they're up to etc.
@@ -206,9 +262,11 @@ export default {
           'Content-Type': 'application/json;charset=utf-8'
         },
         body: JSON.stringify(playerInfo)
-      }).then((res) => res.json());
+      });
+      console.info("update player table !!!");
       console.info(response);
     },
+
     /*
      *  Update Player Score and Position function
      *
@@ -220,22 +278,30 @@ export default {
      *  TODO: a possible fix to the weird updating bug could be fetching the leaderboard, amending it with the player's new score and then updating the database with the new score.
      *     NB: This shouldn't affect how the leaderboard position function works
      *     (the issue is that the database doesn't get updated fast enough for it to show the new changes, so this would be a good way round that.)
-     *  TODO: This function also should set the player's question to whatever is stored in the database
      */
     async updatePlayerScoreAndPos(adjustment) {
       if (adjustment == 0) {
         this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json());
-        this.score = this.findCurrentPlayer(false);
+        this.score = this.findCurrentPlayer(false, this.tableData);
       }
       else {
         this.score += adjustment;
-        this.updatePlayerTable();
-        this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json);
+        console.info(`Player score is: ${this.score} !!!`);
+        let playerPos = 0;
+        let tempTable = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json()); //  fetch the latest version of the leaderboard and save it locally in a variable
+        playerPos = this.findCurrentPlayer(true, tempTable);                                                    //  get the position of the current player in the leaderboard
+        console.debug(tempTable);                                                                               //  DEBUG statements
+        console.info(`Element at : ${playerPos} !!!`);
+        console.debug(this.tableData);
+        console.info(`Got ${tempTable[playerPos].name}`);
+        tempTable[playerPos].score = this.score;                                                                //  update the player's score in the local copy of the database
+        this.tableData = tempTable;                                                                             //  update the table shown on screen
+        this.updatePlayerTable();                                                                               //  update the database with the new score ONLY
       }
-      document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;
-      // this.tableData.push({id: 5050, lifeline5050: true, lifelineSkip: true, lobbyId: 90909090, name: "bethany", score: this.score, questionIndex: this.currQuestion}); // TEMPORARY FIX !! TODO: REMOVE THIS LATER after full API integration
-      this.tableData.sort((a,b) => b.score - a.score);
-      let playerPos = this.findCurrentPlayer(true);
+      document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;                                //  update the player's score on screen
+      document.getElementById("streak").innerHTML = `Streak: ${this.streak}`;                             
+      this.tableData.sort((a,b) => b.score - a.score);                                                          //  sort the table
+      let playerPos = this.findCurrentPlayer(true, this.tableData) + 1;                                         //  find the player's position on the leaderboard
       let positionElem = document.getElementById("playerPosition");
       console.info(`Player position: ${playerPos}`);
       switch (playerPos) {
@@ -253,25 +319,26 @@ export default {
           break;
       }
     },
+
     /*
      *  Find Current Player in the Table function
      *  This function finds the player's data in the latest version of the data pulled from the database.
      *  It can be used to get the player's score or their position in the leaderboard
      */
-    findCurrentPlayer(position) {
-      for (let playerPos=0; playerPos < this.tableData.length; playerPos++) {
+    findCurrentPlayer(position, tempTable) {
+      for (let playerPos=0; playerPos < tempTable.length; playerPos++) {
         console.info("in player loop!");
-        if (this.tableData[playerPos].name === this.nickname) {
+        if (tempTable[playerPos].name === this.nickname) {
             if (position) {
-              playerPos++;
               return playerPos;
             }
             else {
-              return this.tableData[playerPos].score;
+              return tempTable[playerPos].score;
             }
         }
       }
     },
+
     /*
      *  Get Next Question function
      *  This function simply gets the next question by iterating the player's question index that is locally stored. It updates the data in the Player table and then loads the new question.
@@ -279,8 +346,9 @@ export default {
     getNextQuestion() {
       this.currQuestion++;
       this.updatePlayerTable();
-      this.loadQs();
+      this.loadQs(false);
     },
+
     /*
      *  Get Questions from Open Trivia DB API function
      *  This function loads the questions from either the Open Trivia DB or from the Database.
@@ -288,59 +356,155 @@ export default {
      *  Otherwise, it will just continue to load the question the player is currently on. (as the questions will be stored in the lobbyInfo object pulled from the DB)
      */
     async getQs() {
-      this.lobbyInfo = await fetch(`/quizApi/Lobbies/${this.lobbyInfo.id}`).then((res) => res.json());
+      let noData = false;
+      let response = await fetch(`/quizApi/Questions/inlobby/${this.lobbyInfo.id}`).then((res) => res.json()).catch((error) => noData = true);
       console.info("IN HERE");
-      if (this.lobbyInfo.easyQuestions === "" || this.lobbyInfo.mediumQuestions === "" || this.lobbyInfo.hardQuestions === "") { // checks the DB lobby data to see if questions have already been generated, if not, it generates them
-        this.lobbyInfo.easyQuestions = await fetch(`/getQuestions/amount=10&category=9&difficulty=easy&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
-        this.lobbyInfo.mediumQuestions = await fetch(`/getQuestions/amount=10&category=9&difficulty=medium&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
-        this.lobbyInfo.hardQuestions = await fetch(`/getQuestions/amount=10&category=9&difficulty=hard&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
-        this.updateLobbyTable();
-      }
-      /*this.easyQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=easy&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results); // using the tokens to get the questions via the API
-      this.mediumQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=medium&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results);
-      this.hardQs = await fetch(`/getQuestions/amount=10&category=9&difficulty=hard&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results);*/
-      console.info("Base64 questions");
+      if (!noData) { console.info(response); }
+      if (noData) { // checks the DB lobby data to see if questions have already been generated, if not, it generates them
+        let easyQSelector = this.getRandomNum(10,30);   // pick a random category from the list
+        let medQSelector = this.getRandomNum(10,30);
 
-      this.loadQs();
+        while (easyQSelector == 29 || easyQSelector == 20 ) { // while the category is not Mythology or General Knowledge
+          easyQSelector = this.getRandomNum(10,30);   // pick a different category
+        }
+        while (medQSelector == 29 || medQSelector == 20 || medQSelector == easyQSelector) { // does the same as above, but makes sure that the category is different to above.
+          medQSelector = this.getRandomNum(10,30);
+        }
+        console.info(easyQSelector);
+        console.info(medQSelector);
+
+        this.allQuestions.push.apply(this.allQuestions, await fetch(`/getQuestions/amount=6&category=${easyQSelector}&difficulty=easy&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results)); // using the tokens to get the questions via the API
+        this.allQuestions.push.apply(this.allQuestions, await fetch(`/getQuestions/amount=8&category=${medQSelector}&difficulty=medium&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results)); // using the tokens to get the questions via the API
+        this.allQuestions.push.apply(this.allQuestions, await fetch(`/getQuestions/amount=6&category=9&difficulty=hard&type=multiple&encode=base64`).then((res) => res.json()).then((res) => res.results)); // using the tokens to get the questions via the API
+        this.sendQuestions();
+
+        this.decodeJsonData(true);
+      }
+      else {  // if not, we just need to decode them!
+        console.info("we got questions at home !");
+        this.allQuestions = response;
+        console.info(this.allQuestions);
+        this.decodeJsonData(false);
+      }
+      this.loadQs(true);
+    },
+
+    /*
+     *  Send Questions to the Question table function
+     *  This function is responsible for inserting the new questions for a lobby into the question table
+     */
+    async sendQuestions() {
+      let request = this.reformatQuestions(this.allQuestions);
+      const response = await fetch(`/quizApi/Questions/list`, {                 // the POST request to push our array of Question objects
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(request)
+      });
+      console.info("response!");
+      console.info(response);
+    },
+    /*
+     *  Reformat Questions into the API format
+     *  This function takes the data that the Open Trivia DB sends and converts it into a format that the API understands
+     */
+    reformatQuestions(questionArr) {
+      let result = [];                                                                                                                     // this is the data structure that will be sending the questions to the API
+      let questionIndex = 1;                                                    // used to include question numbers with each questions
+      let question;                                                             // used in the for loop to iterate through the tempQuestions array
+      let reqQuestion;                                                          // used in the for loop to temporarily store the question in the accepted format for the API
+      console.info("in reformat questions!!")
+      for (question of questionArr) {
+        console.info("in for loop!");
+        reqQuestion = question;
+        reqQuestion.questionIndex = questionIndex;
+        questionIndex++;
+        reqQuestion.lobbyId = this.lobbyInfo.id;                                // save the question number and correct answer to each question as well as the lobby ID
+        reqQuestion.correctAnswer = question.correct_answer;
+
+        for (let i = 0; i < reqQuestion.incorrect_answers.length; i++) {        // loops through the incorrect answer array and saves them as individual variables for the API to understand
+          let propertyName = "incorrectAnswer" + (i+1);
+          reqQuestion[propertyName] = reqQuestion.incorrect_answers[i];
+        }
+        delete(reqQuestion.correct_answer);
+        delete(reqQuestion.incorrect_answers);
+        result.push(reqQuestion);
+      }
+      return result;
     },
     /*
      *  Decode JSON Data function
-     *  This function is responsible for decoding the Base64. It decodes them and stores it in the currQuestionJSON object which stores the JSON data of the current question.
+     *  This function is responsible for decoding the Base64. It is run after we pull the questions from the DB, so it decodes each question and returns it
+     *  to it's original format for the frontend to read and process easily.
      */
-    decodeJsonData() {  // had issues with HTML encoding so this converts the Base64 encoded data back into ASCII
-      let tempVar = this.currQuestionJSON;
-      this.currQuestionJSON.category = decodeURIComponent(escape(window.atob(tempVar.category)));
-      this.currQuestionJSON.correct_answer = decodeURIComponent(escape(window.atob(tempVar.correct_answer)));
-      this.currQuestionJSON.difficulty = decodeURIComponent(escape(window.atob(tempVar.difficulty)));
-      this.currQuestionJSON.question = decodeURIComponent(escape(window.atob(tempVar.question)));
-      this.currQuestionJSON.type = decodeURIComponent(escape(window.atob(tempVar.type)));
-      let incorrectAnswers = [];
-      let answer;
-      for (answer of tempVar.incorrect_answers) {
-        incorrectAnswers.push(decodeURIComponent(escape(window.atob(answer))));
+    decodeJsonData(newData) {  // had issues with HTML encoding so this converts the Base64 encoded data back into ASCII
+      let question;
+      if (newData) {  // decoding data from Open Trivia API
+        for (question of this.allQuestions) {
+          question.category = decodeURIComponent(escape(window.atob(question.category)));
+          question.correct_answer = decodeURIComponent(escape(window.atob(question.correct_answer)));
+          question.difficulty = decodeURIComponent(escape(window.atob(question.difficulty)));
+          question.question = decodeURIComponent(escape(window.atob(question.question)));
+          question.type = decodeURIComponent(escape(window.atob(question.type)));
+          for (let i = 0; i < 3; i++) {
+            question.incorrect_answers[i] = decodeURIComponent(escape(window.atob(question.incorrect_answers[i])));
+          }
+        }
+        console.info("data from Open trivia DBBB !!!");
+        console.info(this.allQuestions);
       }
-      this.currQuestionJSON.incorrect_answers = incorrectAnswers;
-      console.info(this.currQuestionJSON);
+      else {  // decoding data from DB
+        console.info("decoding DB DATA !!!");
+        console.info(this.allQuestions);
+        for (question of this.allQuestions) {
+          question.category = decodeURIComponent(escape(window.atob(question.category)));
+          question.correct_answer = decodeURIComponent(escape(window.atob(question.correctAnswer)));
+          question.difficulty = decodeURIComponent(escape(window.atob(question.difficulty)));
+          question.question = decodeURIComponent(escape(window.atob(question.question)));
+          question.type = decodeURIComponent(escape(window.atob(question.type)));
+          delete question.correctAnswer;
+          let incorrectAnswers = [];
+          let answer;
+          for (let i = 0; i < 3; i++) {
+            let propertyName = "incorrectAnswer" + (i+1);
+            incorrectAnswers.push(decodeURIComponent(escape(window.atob(question[propertyName]))));
+            delete question[propertyName];
+          }
+          question.incorrect_answers = incorrectAnswers;
+        }
+        console.info("data from DB !!!");
+        console.info(this.allQuestions);
+
+      }
     },
+
     /*
      *  Load Current Question function
      *  This function loads the current question - so it loads the data into the currQuestionJSON object from the lobbyInfo object.
      *  It decodes the question data, updates the question field as well as the difficulty, the topic and the question number fields.
+     *  TODO: this function should load the player's question index from the DB
      */
-    loadQs() {
+    async loadQs(firstLoad) {
+      if (firstLoad) {  // if it's the first time that it's loading the game
+        let request = {
+          name: this.nickname,
+          lobbyId: this.lobbyInfo.id
+        };
+        let playerInfo = await fetch(`/quizApi/Players/getInfo`, {                 // the POST request to get the player info so we can find the question the player is up to
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+          },
+          body: JSON.stringify(request)
+        }).then((res) => res.json());
+        this.currQuestion = playerInfo.questionIndex;
+      }
       console.info(`current question: ${this.currQuestion - 1}`);
-      if (this.currQuestion < 10) {
-        this.currQuestionJSON = this.lobbyInfo.easyQuestions[this.currQuestion -1];
-      }
-      else if (this.currQuestion < 20) {
-        this.currQuestionJSON = this.lobbyInfo.mediumQuestions[this.currQuestion -10];
-      }
-      else if (this.currQuestion < 30) {
-        this.currQuestionJSON = this.lobbyInfo.hardQuestions[this.currQuestion -20];
-      }
-      else if (this.currQuestion == 30) { // TODO: end of game
+      if (this.currQuestion == 20) { // TODO: end of game
         alert("Game over!");
       }
+      /*
       if (this.currQuestion == 6) { // TODO: end of game
         document.location.href = "http://localhost:3000/results";
         const allAnsButtons = document.getElementsByClassName("answerButton");
@@ -349,13 +513,13 @@ export default {
           ansButton.disabled = true;
         }
         return 0;
-      }
-      this.decodeJsonData();
+      }*/
       document.getElementById("questionNumber").innerHTML = `Question ${this.currQuestion}`;  // updates the question number and the topic
-      document.getElementById("questionTopic").innerHTML = `Difficulty: ${this.currQuestionJSON.difficulty} <br>Topic: ${this.currQuestionJSON.category} </br>`
-      document.getElementById("questionBox").innerHTML = this.currQuestionJSON.question;  // updates the question box and shows the question to the player
+      document.getElementById("questionTopic").innerHTML = `Difficulty: ${this.allQuestions[this.currQuestion].difficulty} <br>Topic: ${this.allQuestions[this.currQuestion].category} </br>`
+      document.getElementById("questionBox").innerHTML = this.allQuestions[this.currQuestion].question;  // updates the question box and shows the question to the player
       this.updateQuestion();
     },
+
     /*
      *  Update Question Buttons function
      *  This function updates the answwwer buttons by randomly selecting one of them to be the correct answer and then populating the remaining buttons with incorrect answers
@@ -364,17 +528,19 @@ export default {
     updateQuestion() { // pick a random number between 1 and 4, this will be used to asign the correct answer to a button.
       const correctAnswer = this.getRandomNum(0,3);
       const answerLabels = document.getElementsByClassName("answerLabel");
-      answerLabels[correctAnswer].innerHTML = this.currQuestionJSON.correct_answer;
-      console.info(`correct answer - ${this.currQuestionJSON.correct_answer}`);
+      answerLabels[correctAnswer].innerHTML = this.allQuestions[this.currQuestion].correct_answer;
+      console.debug(`correct answer - ${this.allQuestions[this.currQuestion].correct_answer}`);
       let counter = 0;
       for (let i = 0; i < answerLabels.length; i++) { // assigns the other answers to the remaining buttons
-        if (answerLabels[i].innerHTML != this.currQuestionJSON.correct_answer) {
-          answerLabels[i].innerHTML = this.currQuestionJSON.incorrect_answers[counter];
-          console.info(`incorrect answer - ${this.currQuestionJSON.incorrect_answers[counter]}`);
+        if (answerLabels[i].innerHTML != this.allQuestions[this.currQuestion].correct_answer) {
+          answerLabels[i].innerHTML = this.allQuestions[this.currQuestion].incorrect_answers[counter];
+          console.debug(`incorrect answer - ${this.allQuestions[this.currQuestion].incorrect_answers[counter]}`);
           counter++;
         }
       }
+      this.startTimer();
     },
+
     /*
      *  Get a random number function
      *  This simply generates a random number between the given range and returns it.
@@ -382,8 +548,97 @@ export default {
      */
     getRandomNum (min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
+    },
+
+    /*
+     *  When Timer Runs Out Function
+     *  If player has not answered q before timer runs out, deduct 500 points, set streak to 0, load next q
+     */
+    onTimesUp() {
+      clearInterval(this.timerInterval);
+      this.updatePlayerScoreAndPos(-500);
+      this.getNextQuestion();
+      this.streak == 0;
+    },
+
+    /*
+     *  Start Timer Function
+     *  Sets time passed to 0, clears the interval and restarts the timer, called when a new question is loaded
+     */
+    startTimer() {
+      this.timePassed = 0;
+      clearInterval(this.timerInterval);
+      this.timerInterval = setInterval(() => (this.timePassed += 1), 1000);
+    }
+
+  },
+  computed: {
+
+    /*
+     *  Function to animate the countdown
+     */
+    circleDasharray() {
+      return `${(this.timeFraction * FULL_DASH_ARRAY).toFixed(0)} 283`;
+    },
+
+    /*
+     *  Function to format the timer
+     */
+    formattedTimeLeft() {
+      const timeLeft = this.timeLeft;
+      const minutes = Math.floor(timeLeft / 60);
+      let seconds = timeLeft % 60;
+
+      if (seconds < 10) {
+        seconds = `0${seconds}`; //If timer has <10s to go, prefix with a 0
+      }
+
+      return `${minutes}:${seconds}`;
+    },
+
+    /*
+     *  Function to return the time left on the timer
+     */
+    timeLeft() {
+      return TIME_LIMIT - this.timePassed;
+    },
+
+    /*
+     *  Function to reduce the length of the ring gradually during the countdown to ensure animation reaches 0
+     */
+    timeFraction() {
+      const rawTimeFraction = this.timeLeft / TIME_LIMIT;
+      return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
+    },
+
+    /*
+     *  Function to return the correct colour for the countdown animation
+     */
+    remainingPathColor() {
+      const { alert, warning, info } = COLOR_CODES;
+
+      if (this.timeLeft <= alert.threshold) {
+        return alert.color;
+      } else if (this.timeLeft <= warning.threshold) {
+        return warning.color;
+      } else {
+        return info.color;
+      }
     }
   },
+
+  watch: {
+
+    /*
+     *  Function that calls onTimesUp() when timer reaches 0
+     */
+    timeLeft(newValue) {
+      if (newValue === 0) {
+        this.onTimesUp();
+      }
+    }
+  },
+
   /*
    *  The starting function!
    *  This function is what is called when the page loads.
@@ -406,16 +661,13 @@ export default {
 
 
 <style lang="scss">
-  $warning: #ffba49;
-  $link: #20a39e;
-  $info: #a4a9ad;
-  $danger: #f9b1b1;
-  $primary: #23001e;
+
   .answerLabel {
       white-space: break-spaces;
-
   }
-
+  .answerButton {
+    border-color: black !important;
+  }
   .border{
     border: 3px solid black;
   }
@@ -439,4 +691,61 @@ export default {
   .is-centered{
     text-align: center;
   }
+
+    .base-timer {
+  position: fixed;
+  top: 960px;
+  left: 985px;
+  width: 100px;
+  height: 100px;
+  z-index: 2;
+  background-color: white;
+
+  &__svg {
+    transform: scaleX(-1);
+  }
+
+  &__circle {
+    fill: none;
+    stroke: none;
+  }
+
+  &__path-elapsed {
+    stroke-width: 7px;
+    stroke: grey;
+  }
+
+  &__path-remaining {
+    stroke-width: 7px;
+    stroke-linecap: round;
+    transform: rotate(90deg);
+    transform-origin: center;
+    transition: 1s linear all;
+    fill-rule: nonzero;
+    stroke: currentColor;
+
+    &.green {
+      color: rgb(65, 184, 131);
+    }
+
+    &.orange {
+      color: orange;
+    }
+
+    &.red {
+      color: red;
+    }
+  }
+
+  &__label {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+  }
+}
 </style>
