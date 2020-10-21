@@ -50,18 +50,18 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent is-vertical buttons">
         <b-button @click="checkAnswer('ansOne')" class="tile is-child border is-white answerButton" id="ansOneA">
-          <p class="is-size-3-tablet answerLabel" id="ansOne">----</p>
+          <p class="is-size-2-tablet answerLabel" id="ansOne">----</p>
         </b-button>
         <b-button @click="checkAnswer('ansTwo')" class="tile is-child border is-white answerButton" id="ansTwoA">
-          <p class="is-size-3-tablet answerLabel" id="ansTwo">----</p>
+          <p class="is-size-2-tablet answerLabel" id="ansTwo">----</p>
         </b-button>
       </div>
       <div class="tile is-parent is-vertical buttons">
         <b-button @click="checkAnswer('ansThree')" class="tile is-child border is-white answerButton" id="ansThreeA">
-          <p class="is-size-3-tablet answerLabel" id="ansThree">----</p>
+          <p class="is-size-2-tablet answerLabel" id="ansThree">----</p>
         </b-button>
         <b-button @click="checkAnswer('ansFour')" class="tile is-child border is-white answerButton" id="ansFourA">
-          <p class="is-size-3-tablet answerLabel" id="ansFour">----</p>
+          <p class="is-size-2-tablet answerLabel" id="ansFour">----</p>
         </b-button>
       </div>
       <div class="tile is-parent is-4"> <!-- LEADERBOARD TILE -->
