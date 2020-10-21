@@ -244,6 +244,9 @@ export default {
       }, 2000);
     },
 
+    /*
+     *  Function to reset all answer button colours and re-enable them all
+     */
     resetAnswerButtons() {
       document.getElementById("ansOne").style.backgroundColor = "white";
         document.getElementById("ansOneA").style.backgroundColor = "white";
@@ -258,10 +261,13 @@ export default {
         document.getElementById("ansThreeA").disabled = false;
         document.getElementById("ansFourA").disabled = false;
     },
-
+   
+    /*
+     *  Function to remove two incorrect answers for 50/50 lifeline 
+     */
     fiftyfiftyLifeline() {
 
-      document.getElementById("fiftyfifty").disabled = true;
+      document.getElementById("fiftyfifty").disabled = true; //disable lifeline after 1 use
       let answer;
 
       if (document.getElementById("ansOne").innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
@@ -320,8 +326,11 @@ export default {
       }
     },
 
+    /*
+     *  Function to skip a question without losing points or their streak for skip lifeline
+     */
     skipLifeline() {
-      document.getElementById("skip").disabled = true;
+      document.getElementById("skip").disabled = true; //disable lifeline after 1 use
       this.getNextQuestion();
     },
 
