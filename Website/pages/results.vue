@@ -1,13 +1,12 @@
 <template>
     <section class="section is-fullheight">
-      <div class="column is-mobile is-centered">
+      <div class="container column is-mobile is-centered is-8">
           <article class="tile is-child notification is-black">
             <p class="title titlefont is-centered" id="playerPosition">----</p>
             <p class="subtitle subfont is-centered" id="playerScore">----</p>
           </article>
-          <h1>{{lobbyCode}}</h1>
       </div>
-      <div class="column is-mobile is-centered">
+      <div class="container column is-mobile is-centered is-8">
         <b-table
                 :data="tableData"
                 :columns="tableColumns"
@@ -45,18 +44,19 @@ export default {
         nickname: "",
         score: 0,
         tableColumns: [
-            {
-                field: 'name',
-                label: 'Nickname',
-                width: '40',
-            },
-            {
-                field: 'score',
-                label: 'Score',
-                numeric: true,
-                sortable: true,
-                centered: true
-            }
+          {
+              field: 'name',
+              label: 'Nickname',
+              width: '150',
+          },
+          {
+              field: 'score',
+              label: 'Score',
+              numeric: true,
+              sortable: true,
+              centered: true,
+              width: '100'
+          }
         ],
       lobbyInfo: []
     }
@@ -85,28 +85,6 @@ export default {
       return lobbyId;
     },
 
-    /*
-     *  Update Lobby Table function
-     *  Updates the database with the questions generated in the front end so players can pull that data when they want to play
-     *  TODO: the PUT requests need to be fixed API side, so this function will need amending at some point
-     */
-    async updateLobbyTable() {
-      let tempLobbyInfo = {
-        id: this.lobbyInfo.id,
-        easyQuestions: JSON.stringify(this.lobbyInfo.easyQuestions),
-        mediumQuestions: JSON.stringify(this.lobbyInfo.mediumQuestions),
-        hardQuestions: JSON.stringify(this.lobbyInfo.hardQuestions),
-      };
-      const response = await fetch(`/quizApi/Lobbies/${this.lobbyInfo.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8'
-        },
-        body: JSON.stringify(this.lobbyInfo)
-      }).then((res) => res.json());
-      console.info("IN UPDATE LOBBY");
-      console.info(response);
-    },
 
     /*
      *  Update Player Table function
@@ -129,33 +107,17 @@ export default {
           'Content-Type': 'application/json;charset=utf-8'
         },
         body: JSON.stringify(playerInfo)
-      }).then((res) => res.json());
+      });
+      console.info("update player table !!!");
       console.info(response);
     },
 
-    /*
-     *  Update Player Score and Position function
-     *
-     *  This function has two purposes - adjusting the player's score and updating the score, position and leaderboard elements.
-     *  If it is run at the start of the game, it will query the database for the current player's score and save that as their existing score.
-     *  otherwise, it will adjust their score locally and then update the database with the change and pull the latest changes from the database
-     *  It also updates the position shown on screen so the player knows where they place on the leaderboard
-     */
-    updatePlayerScoreAndPos(adjustment) {
-      this.score += adjustment;
-      this.refreshLeaderboard();
-      if (adjustment != 0) { this.updatePlayerTable(); }
-      document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;
-      // this.tableData.push({id: 5050, lifeline5050: true, lifelineSkip: true, lobbyId: 90909090, name: "bethany", score: this.score, questionIndex: this.currQuestion}); // TEMPORARY FIX !! TODO: REMOVE THIS LATER after full API integration
-      this.tableData.sort((a,b) => b.score - a.score);
-      let playerPos = 0;
-      for (playerPos=0; playerPos < this.tableData.length; playerPos++) {
-        console.info("in player loop!");
-        if (this.tableData[playerPos].name === this.nickname) {
-            break;
-        }
-      }
-      playerPos++;
+    async updatePlayerScoreAndPos() {
+      this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json());
+      this.score = this.findCurrentPlayer(false, this.tableData);
+      this.tableData.sort((a,b) => b.score - a.score);                                                          //  sort the table
+      let playerPos = this.findCurrentPlayer(true, this.tableData) + 1;                                         //  find the player's position on the leaderboard
+      document.getElementById("playerScore").innerHTML = `Score: ${this.score}`;                                //  update the player's score on screen
       let positionElem = document.getElementById("playerPosition");
       console.info(`Player position: ${playerPos}`);
       switch (playerPos) {
@@ -174,6 +136,25 @@ export default {
       }
     },
 
+    /*
+     *  Find Current Player in the Table function
+     *  This function finds the player's data in the latest version of the data pulled from the database.
+     *  It can be used to get the player's score or their position in the leaderboard
+     */
+    findCurrentPlayer(position, tempTable) {
+      for (let playerPos=0; playerPos < tempTable.length; playerPos++) {
+        console.info("in player loop!");
+        if (tempTable[playerPos].name === this.nickname) {
+            if (position) {
+              return playerPos;
+            }
+            else {
+              return tempTable[playerPos].score;
+            }
+        }
+      }
+    },
+
     async refreshLeaderboard() {
       this.tableData = await fetch(`/quizApi/Players/inlobby/${this.lobbyInfo.id}`).then((res) => res.json());
       console.info(this.tableData);
@@ -189,12 +170,10 @@ export default {
   async fetch() {
     let lobbyId = this.getGameDetails();
     this.lobbyInfo = await fetch(`/quizApi/Lobbies/${lobbyId}`).then((res) => res.json());
-    console.info(this.lobbyInfo);
-
     document.getElementById("lobbyCode").innerHTML = this.lobbyInfo.id;
     document.getElementById("userNickname").innerHTML = this.nickname;
-    this.updatePlayerScoreAndPos(0);
-    this.startGame();
+    this.updatePlayerScoreAndPos();
+    this.refreshLeaderboard();
   },
 }
 
