@@ -26,14 +26,15 @@ namespace QuizAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Lobby>>> GetLobbyItems()
         {
+            //Setup the connection and command
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
             SqlCommand cmd = new SqlCommand("SELECT * FROM lobby;", cnn);
 
             cnn.Open();
-            SqlDataReader data = cmd.ExecuteReader();
+            SqlDataReader data = cmd.ExecuteReader(); //Executes the command and returns data to the datareader
 
-            if(data.HasRows == false)
+            if(data.HasRows == false) //Check if any record exists
             {
                 data.Close();
                 cmd.Dispose();
@@ -41,7 +42,7 @@ namespace QuizAPI.Controllers
                 return NotFound();
             }
 
-            //create lobby list
+            //Create list of lobbies and add data from the datareader 
             List<Lobby> lobbies = new List<Lobby>();
             Lobby tmp;
 
@@ -49,11 +50,8 @@ namespace QuizAPI.Controllers
             {
                 tmp = new Lobby();
                 tmp.id = data.GetInt32(0);
-                tmp.easyQuestions = data.GetString(1);
-                tmp.mediumQuestions = data.GetString(2);
-                tmp.hardQuestions = data.GetString(3);
-                tmp.requestURL = data.GetString(4);
-                tmp.date = data.GetDateTime(5).ToString();
+                tmp.requestURL = data.GetString(1);
+                tmp.date = data.GetDateTime(2).ToString();
 
                 lobbies.Add(tmp);
             }
@@ -70,14 +68,15 @@ namespace QuizAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Lobby>> GetLobby(int id)
         {
+            //Setup the connection and command 
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
             SqlCommand cmd = new SqlCommand("SELECT * FROM lobby WHERE id="+id+";", cnn);
 
             cnn.Open();
-            SqlDataReader data = cmd.ExecuteReader();
+            SqlDataReader data = cmd.ExecuteReader(); //Executes the command and returns data to the datareader
 
-            if (data.HasRows == false)
+            if(data.HasRows == false) //Check if any record exists
             {
                 data.Close();
                 cmd.Dispose();
@@ -85,16 +84,13 @@ namespace QuizAPI.Controllers
                 return NotFound();
             }
 
-            //create lobby object
+            //Create a lobby object and add data from the datareader 
             Lobby lobby = new Lobby();
 
             data.Read();
             lobby.id = data.GetInt32(0);
-            lobby.easyQuestions = data.GetString(1);
-            lobby.mediumQuestions = data.GetString(2);
-            lobby.hardQuestions = data.GetString(3);
-            lobby.requestURL = data.GetString(4);
-            lobby.date = data.GetDateTime(5).ToString();
+            lobby.requestURL = data.GetString(1);
+            lobby.date = data.GetDateTime(2).ToString();
 
             data.Close();
             cmd.Dispose();
@@ -103,27 +99,26 @@ namespace QuizAPI.Controllers
             return lobby;
         }
 
-
-
         ////**** PUT ****////
         // PUT: api/Lobbies/[id]
         // UPDATE
         [HttpPut("{id}")]
         public async Task<IActionResult> PutLobby(int id, Lobby lobby)
         {
-            if (id != lobby.id)
+            if(id != lobby.id) //Check if id in url is same as id in the body
             {
                 return BadRequest();
             }
 
+            //Setup the conenction and command 
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
             SqlCommand cmd = new SqlCommand("SELECT * FROM lobby WHERE id=" + id + ";", cnn);
 
             cnn.Open();
-            SqlDataReader data = cmd.ExecuteReader();
+            SqlDataReader data = cmd.ExecuteReader(); //Executes the command and returns data to the datareader
 
-            if(data.HasRows == false)
+            if(data.HasRows == false) //Check if any record exists
             {
                 data.Close();
                 cmd.Dispose();
@@ -134,23 +129,18 @@ namespace QuizAPI.Controllers
             data.Close();
             cmd.Dispose();
 
-            connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
+            //Change the command to update the record
             cmd = new SqlCommand("UPDATE lobby " +
-                                            "SET easyQuestions = '" + lobby.easyQuestions +
-                                            "', mediumQuestions = '" + lobby.mediumQuestions +
-                                            "', hardQuestions = '" + lobby.hardQuestions +
-                                            "', requestURL = '" + lobby.requestURL +
+                                            "SET requestURL = '" + lobby.requestURL +
                                             "', date = '" + lobby.date +
                                             "' WHERE Id = " + id + ";", cnn);
 
-            cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery(); //Executes the command 
             cmd.Dispose();
             cnn.Close();
 
             return NoContent();
         }
-
-
 
         ////**** POST ****////
         // POST: api/Lobbies
@@ -158,17 +148,20 @@ namespace QuizAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Lobby>> PostLobby(Lobby lobby)
         {
+            //Setup the connection
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
 
+            //Setup the random generator
             Random rnd = new Random();
             lobby.id = rnd.Next(10000000, 99999999);
 
+            //Setup the command
             SqlCommand cmd = new SqlCommand("SELECT * FROM lobby WHERE id=" + lobby.id + ";", cnn);
             cnn.Open();
             SqlDataReader data = cmd.ExecuteReader();
 
-            while (data.HasRows == true)
+            while (data.HasRows == true) //Check if lobby id exists
             {
                 lobby.id = rnd.Next(10000000, 99999999);
                 cmd.Dispose();
@@ -179,10 +172,11 @@ namespace QuizAPI.Controllers
             data.Close();
             cmd.Dispose();
 
-            cmd = new SqlCommand("INSERT INTO lobby(id, easyQuestions, mediumQuestions, hardQuestions, requestURL, date) " +
-                                 "VALUES(" + lobby.id + ", '" + lobby.easyQuestions + "', '" + lobby.mediumQuestions + "', '" + lobby.hardQuestions + "', '" + lobby.requestURL + "', '" + lobby.date + "');", cnn);
+            //Change the command to insert the record
+            cmd = new SqlCommand("INSERT INTO lobby(id, requestURL, date) " +
+                                 "VALUES(" + lobby.id + "', '" + lobby.requestURL + "', '" + lobby.date + "');", cnn);
 
-            cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery(); //Executes the command
             cmd.Dispose();
             cnn.Close();
 
@@ -194,14 +188,15 @@ namespace QuizAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<Lobby>> DeleteLobby(int id)
         {
+            //Setup the connection and command
             string connetionString = "Data Source=riddlers.database.windows.net;Initial Catalog=quizgame;User ID=team8;Password=b7zYDzhJ;";
             SqlConnection cnn = new SqlConnection(connetionString);
-            SqlCommand cmd = new SqlCommand("SELECT Id FROM lobby WHERE id=" + id + ";", cnn);
+            SqlCommand cmd = new SqlCommand("SELECT id FROM lobby WHERE id=" + id + ";", cnn);
 
             cnn.Open();
-            SqlDataReader data = cmd.ExecuteReader();
+            SqlDataReader data = cmd.ExecuteReader(); //Executes the command and returns data to the datareader
 
-            if (data.HasRows == false)
+            if(data.HasRows == false) //Check if any record exists
             {
                 data.Close();
                 cmd.Dispose();
@@ -212,8 +207,9 @@ namespace QuizAPI.Controllers
             data.Close();
             cmd.Dispose();
 
+            //Change the command to delete the record
             cmd = new SqlCommand("DELETE FROM lobby WHERE id = " + id + ";", cnn);
-            cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery(); //Executes the command
 
             cmd.Dispose();
             cnn.Close();
