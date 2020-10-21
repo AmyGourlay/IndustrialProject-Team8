@@ -37,8 +37,8 @@
           <p class="title is-centered">Lifelines</p>
           <p class="subtitle is-centered">Need some help? This is the place!</p>
           <div class="buttons is-centered">
-            <b-button class="lifeline is-yellow">50/50</b-button>
-            <b-button class="lifeline is-yellow">Skip Question</b-button>
+            <b-button @click="fiftyfiftyLifeline()" class="lifeline is-yellow" id="fiftyfifty">50/50</b-button>
+            <b-button @click="skipLifeline()" class="lifeline is-yellow" id="skip">Skip Question</b-button>
           </div>
         </article>
         <article class="tile is-child box border">
@@ -204,7 +204,7 @@ export default {
      *  Called when the player clicks any of the four answer buttons, it checks if the button pressed contained the correct answer to the
      *  question, returns the appropriate message, adjusts their score and gets the next question.
      */
-    async checkAnswer(buttonId) {
+    checkAnswer(buttonId) {
       console.info(document.getElementById(buttonId).innerHTML)
        
         if (document.getElementById(buttonId).innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
@@ -239,7 +239,13 @@ export default {
           }
         }
       setTimeout(() => { 
-        document.getElementById("ansOne").style.backgroundColor = "white";
+        this.resetAnswerButtons();
+        this.getNextQuestion();
+      }, 2000);
+    },
+
+    resetAnswerButtons() {
+      document.getElementById("ansOne").style.backgroundColor = "white";
         document.getElementById("ansOneA").style.backgroundColor = "white";
         document.getElementById("ansTwo").style.backgroundColor = "white";
         document.getElementById("ansTwoA").style.backgroundColor = "white";
@@ -247,8 +253,76 @@ export default {
         document.getElementById("ansThreeA").style.backgroundColor = "white";
         document.getElementById("ansFour").style.backgroundColor = "white";
         document.getElementById("ansFourA").style.backgroundColor = "white";
-        this.getNextQuestion();
-      }, 2000);
+        document.getElementById("ansOneA").disabled = false;
+        document.getElementById("ansTwoA").disabled = false;
+        document.getElementById("ansThreeA").disabled = false;
+        document.getElementById("ansFourA").disabled = false;
+    },
+
+    fiftyfiftyLifeline() {
+
+      document.getElementById("fiftyfifty").disabled = true;
+      let answer;
+
+      if (document.getElementById("ansOne").innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
+        answer = 1;
+      }
+      else if (document.getElementById("ansTwo").innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
+        answer = 2;
+      }
+      else if (document.getElementById("ansThree").innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
+        answer = 3;
+      }
+      else if (document.getElementById("ansFour").innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
+        answer = 4;
+      }
+
+      console.log("ANSWER:"+answer);
+
+      let random = this.getRandomNum(1,4);
+      while (random==answer) {
+        random = this.getRandomNum(1,4);
+      }
+      let random2 = this.getRandomNum(1,4);
+      while (random2==answer || random2==random) {
+        random2 = this.getRandomNum(1,4);
+      }
+
+      console.log("RANDOM1:"+random);
+      console.log("RANDOM2:"+random2);
+
+      if (random2 == 1 || random == 1) {
+        //document.getElementById("ansOne").style.backgroundColor = "grey";
+        //document.getElementById("ansOneA").style.backgroundColor = "grey";
+        document.getElementById("ansOneA").disabled = true;
+        console.log("HERE1");
+      }
+
+      if (random2 == 2 || random == 2) {
+        //document.getElementById("ansTwo").style.backgroundColor = "grey";
+        //document.getElementById("ansTwoA").style.backgroundColor = "grey";
+        document.getElementById("ansTwoA").disabled = true;
+        console.log("HERE2");
+      }
+      
+      if (random2 == 3 || random == 3) {
+        //document.getElementById("ansThree").style.backgroundColor = "grey";
+        //document.getElementById("ansThreeA").style.backgroundColor = "grey";
+        document.getElementById("ansThreeA").disabled = true;
+        console.log("HERE3");
+      }
+
+      if (random2 == 4 || random == 4) {
+        //document.getElementById("ansFour").style.backgroundColor = "grey";
+        //document.getElementById("ansFourA").style.backgroundColor = "grey";
+        document.getElementById("ansFourA").disabled = true;
+        console.log("HERE4");
+      }
+    },
+
+    skipLifeline() {
+      document.getElementById("skip").disabled = true;
+      this.getNextQuestion();
     },
 
     /*
