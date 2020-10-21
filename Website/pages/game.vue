@@ -49,6 +49,7 @@
     </div>
     <div class="tile is-ancestor">
       <div class="tile is-parent is-vertical buttons">
+<<<<<<< HEAD
         <b-button @click="checkAnswer('ansOne')" class="tile is-child border is-white answerButton">
           <p class="is-size-3-tablet answerLabel" id="ansOne">----</p>
         </b-button>
@@ -62,6 +63,21 @@
         </b-button>
         <b-button @click="checkAnswer('ansFour')" class="tile is-child border is-white answerButton">
           <p class="is-size-3-tablet answerLabel" id="ansFour">----</p>
+=======
+        <b-button @click="checkAnswer('ansOne')" class="tile is-child border is-white answerButton" id="ansOneA">
+          <p class="is-size-2-tablet answerLabel" id="ansOne">----</p>
+        </b-button>
+        <b-button @click="checkAnswer('ansTwo')" class="tile is-child border is-white answerButton" id="ansTwoA">
+          <p class="is-size-2-tablet answerLabel" id="ansTwo">----</p>
+        </b-button>
+      </div>
+      <div class="tile is-parent is-vertical buttons">
+        <b-button @click="checkAnswer('ansThree')" class="tile is-child border is-white answerButton" id="ansThreeA">
+          <p class="is-size-2-tablet answerLabel" id="ansThree">----</p>
+        </b-button>
+        <b-button @click="checkAnswer('ansFour')" class="tile is-child border is-white answerButton" id="ansFourA">
+          <p class="is-size-2-tablet answerLabel" id="ansFour">----</p>
+>>>>>>> 55b60fc58fef5408fd8276fd608d80d4d28ece97
         </b-button>
       </div>
       <div class="tile is-parent is-4"> <!-- LEADERBOARD TILE -->
@@ -203,20 +219,51 @@ export default {
      *  Called when the player clicks any of the four answer buttons, it checks if the button pressed contained the correct answer to the
      *  question, returns the appropriate message, adjusts their score and gets the next question.
      */
-    checkAnswer(buttonId) {
+    async checkAnswer(buttonId) {
       console.info(document.getElementById(buttonId).innerHTML)
-      if (document.getElementById(buttonId).innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
-        alert("Correct answer! ✔");
-        this.streak+=1;
-        this.updatePlayerScoreAndPos(((30-(this.timePassed))*10)*(this.streak));
+       
+        if (document.getElementById(buttonId).innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
+          //alert("Correct answer! ✔");
+          document.getElementById(buttonId).style.backgroundColor = "green";
+          document.getElementById(buttonId+"A").style.backgroundColor = "green";
+          this.streak+=1;
+          this.updatePlayerScoreAndPos(((30-(this.timePassed))*10)*(this.streak));
 
-      }
-      else {
-        alert("Wrong answer! ❌");
-        this.streak==0;
-        this.updatePlayerScoreAndPos(-500);
-      }
-      this.getNextQuestion();
+        }
+        else {
+          //alert("Wrong answer! ❌");
+          document.getElementById(buttonId).style.backgroundColor = "red";
+          document.getElementById(buttonId+"A").style.backgroundColor = "red";
+          this.streak=0;
+          this.updatePlayerScoreAndPos(-500);
+          if (document.getElementById("ansOne").innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
+            document.getElementById("ansOne").style.backgroundColor = "green";
+            document.getElementById("ansOneA").style.backgroundColor = "green";
+          }
+          else if (document.getElementById("ansTwo").innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
+            document.getElementById("ansTwo").style.backgroundColor = "green";
+            document.getElementById("ansTwoA").style.backgroundColor = "green";
+          }
+          else if (document.getElementById("ansThree").innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
+            document.getElementById("ansThree").style.backgroundColor = "green";
+            document.getElementById("ansThreeA").style.backgroundColor = "green";
+          }
+          else if (document.getElementById("ansFour").innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
+            document.getElementById("ansFour").style.backgroundColor = "green";
+            document.getElementById("ansFourA").style.backgroundColor = "green";
+          }
+        }
+      setTimeout(() => { 
+        document.getElementById("ansOne").style.backgroundColor = "white";
+        document.getElementById("ansOneA").style.backgroundColor = "white";
+        document.getElementById("ansTwo").style.backgroundColor = "white";
+        document.getElementById("ansTwoA").style.backgroundColor = "white";
+        document.getElementById("ansThree").style.backgroundColor = "white";
+        document.getElementById("ansThreeA").style.backgroundColor = "white";
+        document.getElementById("ansFour").style.backgroundColor = "white";
+        document.getElementById("ansFourA").style.backgroundColor = "white";
+        this.getNextQuestion();
+      }, 2000);
     },
 
     /*
