@@ -21,12 +21,12 @@
         </a>
 
           <a class="navbar-item">
-            <p class="is-size-4-tablet" style="margin-right: 5px">Lobby code: </p>
-            <p class="is-size-4-tablet" id="lobbyCode">----</p>
+            <p class="is-size-4-touch" style="margin-right: 5px">Lobby code: </p>
+            <p class="is-size-4-touch" id="lobbyCode">----</p>
           </a>
           <a class="navbar-item">
-            <p class="is-size-4-tablet" style="margin-right: 5px"> Nickname: </p>
-            <p class="is-size-4-tablet" id="userNickname">----</p>
+            <p class="is-size-4-touch" style="margin-right: 5px"> Nickname: </p>
+            <p class="is-size-4-touch" id="userNickname">----</p>
           </a>
         </div>
         <div class="navbar-end">
@@ -51,7 +51,7 @@
 .navbar {
   min-height: 6.25rem;
   text-align: center;
-  width: 60%;
+  width: 80rem;
   margin: auto;
   background-color: white;
   border: 3px solid black;
