@@ -48,22 +48,9 @@
       </div>
     </div>
     <div class="tile is-ancestor">
+      <audio id="correct" src="~/assets/CorrectAnswer.mp3"></audio>
+      <audio id="incorrect" src="~/assets/IncorrectAnswer.mp3"></audio>
       <div class="tile is-parent is-vertical buttons">
-<<<<<<< HEAD
-        <b-button @click="checkAnswer('ansOne')" class="tile is-child border is-white answerButton">
-          <p class="is-size-3-tablet answerLabel" id="ansOne">----</p>
-        </b-button>
-        <b-button @click="checkAnswer('ansTwo')" class="tile is-child border is-white answerButton">
-          <p class="is-size-3-tablet answerLabel" id="ansTwo">----</p>
-        </b-button>
-      </div>
-      <div class="tile is-parent is-vertical buttons">
-        <b-button @click="checkAnswer('ansThree')" class="tile is-child border is-white answerButton">
-          <p class="is-size-3-tablet answerLabel" id="ansThree">----</p>
-        </b-button>
-        <b-button @click="checkAnswer('ansFour')" class="tile is-child border is-white answerButton">
-          <p class="is-size-3-tablet answerLabel" id="ansFour">----</p>
-=======
         <b-button @click="checkAnswer('ansOne')" class="tile is-child border is-white answerButton" id="ansOneA">
           <p class="is-size-2-tablet answerLabel" id="ansOne">----</p>
         </b-button>
@@ -77,7 +64,6 @@
         </b-button>
         <b-button @click="checkAnswer('ansFour')" class="tile is-child border is-white answerButton" id="ansFourA">
           <p class="is-size-2-tablet answerLabel" id="ansFour">----</p>
->>>>>>> 55b60fc58fef5408fd8276fd608d80d4d28ece97
         </b-button>
       </div>
       <div class="tile is-parent is-4"> <!-- LEADERBOARD TILE -->
@@ -226,6 +212,8 @@ export default {
           //alert("Correct answer! ✔");
           document.getElementById(buttonId).style.backgroundColor = "green";
           document.getElementById(buttonId+"A").style.backgroundColor = "green";
+          var ca = document.getElementById("correct")
+          ca.play();
           this.streak+=1;
           this.updatePlayerScoreAndPos(((30-(this.timePassed))*10)*(this.streak));
 
@@ -234,6 +222,8 @@ export default {
           //alert("Wrong answer! ❌");
           document.getElementById(buttonId).style.backgroundColor = "red";
           document.getElementById(buttonId+"A").style.backgroundColor = "red";
+          var ia = document.getElementById("incorrect")
+          ia.play();
           this.streak=0;
           this.updatePlayerScoreAndPos(-500);
           if (document.getElementById("ansOne").innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
