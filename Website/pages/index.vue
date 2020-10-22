@@ -77,8 +77,7 @@ export default {
   name: 'home',
   components: {
     Header,
-    BlackButton,
-    GameMusic
+    BlackButton
   },
   data() {
     return {
