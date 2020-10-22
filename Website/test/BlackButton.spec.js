@@ -10,7 +10,12 @@ describe('Testing the BlackButton component', () => {
           type: String,
           required: true
         }
-      }});
+      },
+        stubs: {
+          'b-field': true,
+          'b-button': true,
+        }
+      });
     expect(wrapper.vm).toBeTruthy()
   });
 
@@ -21,6 +26,10 @@ describe('Testing the BlackButton component', () => {
           type: String,
           required: true
         }
+      },
+      stubs: {
+        'b-field': true,
+        'b-button': true,
       }});
       wrapper.setData({ title: 'test_button'});
       expect(wrapper.vm.title).toBe('test_button');
