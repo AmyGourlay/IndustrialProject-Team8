@@ -56,6 +56,7 @@
           <p class="is-size-4 answerLabel" id="ansOne">----</p>
         </b-button>
         <b-button @click="checkAnswer('ansTwo')" class="tile is-child border is-white answerButton" id="ansTwoA" opacity="1">
+          <p class="is-size-4 answerLabel" id="ansTwo">----</p>
         </b-button>
       </div>
       <div class="tile is-parent is-vertical buttons">
@@ -190,6 +191,7 @@ export default {
       console.log("YAY");
       if (await this.getLobbyInfo(lobbyId)) {
         this.getQs();
+        this.updatePlayerScoreAndPos(0);
       }
     },
 
@@ -201,35 +203,13 @@ export default {
     },
 
     /*
-     *  Get Game Details function
-     *  This function gets the player's info so that their score and details can be pulled from the database
-     */
-    getGameDetails() {
-      let allCookies = document.cookie;
-      let cookieArr = allCookies.split('; ');
-      let nickname;
-      let lobbyId;
-      let cookie;
-      for (cookie of cookieArr) {
-        if (cookie.includes("nickname")) {
-          nickname = cookie.split("nickname=")[1];
-        }
-        if (cookie.includes("lobbyId")) {
-          lobbyId = cookie.split("lobbyId=")[1];
-        }
-      }
-      this.nickname = nickname;
-      return lobbyId;
-    },
-
-    /*
      *  Check Answer function
      *  Called when the player clicks any of the four answer buttons, it checks if the button pressed contained the correct answer to the
      *  question, returns the appropriate message, adjusts their score and gets the next question.
      */
     async checkAnswer(buttonId) {
       console.info(document.getElementById(buttonId).innerHTML);
-       
+
         if (document.getElementById(buttonId).innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
           //alert("Correct answer! ✔");
           document.getElementById(buttonId).style.backgroundColor = "green";
@@ -267,7 +247,7 @@ export default {
           }
         }
       this.disableAnswerButtons();
-      setTimeout(() => { 
+      setTimeout(() => {
         this.resetAnswerButtons();
         this.getNextQuestion();
       }, 2000);
@@ -501,7 +481,7 @@ export default {
     getNextQuestion() {
       this.currQuestion++;
       this.updatePlayerTable();
-      this.loadQs(false);
+        this.loadQs(false);
     },
 
     /*
@@ -658,14 +638,16 @@ export default {
       }
       console.info(`current question: ${this.currQuestion}`);
       if (this.currQuestion == 20) { // TODO: end of game
-        //alert("Game over!");
-        window.location.href = "/results";
+        // alert("Game over!");
         const allAnsButtons = document.getElementsByClassName("answerButton");
         let ansButton;
         for (ansButton of allAnsButtons) {
           ansButton.disabled = true;
         }
-        return 0;
+        let playerString = `nickname=${this.nickname};lobbyId=${this.lobbyInfo.id}`;
+        console.log(playerString);
+        this.$router.push({ name: 'results', params: { playerInfo: playerString} });
+        return true;
       }
       /*
       if (this.currQuestion == 6) { // TODO: end of game
@@ -808,22 +790,6 @@ export default {
     }
   },
 
-  /*
-   *  The starting function!
-   *  This function is what is called when the page loads.
-   *  The lobby information is loaded locally from the database and the player's nickname and lobby ID field are updated on screen.
-   *  This function also gets the score and player info from the DB via update player score and position function.
-   */
-  async fetch() {
-    /*
-    let lobbyId = this.getGameDetails();
-    this.lobbyInfo = await fetch(`/quizApi/Lobbies/${lobbyId}`).then((res) => res.json());
-    console.info(this.lobbyInfo);
-    document.getElementById("lobbyCode").innerHTML = this.lobbyInfo.id;
-    document.getElementById("userNickname").innerHTML = this.nickname;
-    this.updatePlayerScoreAndPos(0);
-    this.startGame();*/
-  },
 }
 
 </script>
@@ -850,6 +816,11 @@ export default {
     width: 100%;
   }
 
+  .box {
+    padding: 1rem;
+    height: auto;
+  }
+
   .is-yellow{
     background-color: #ffba49;
     color: black;
@@ -874,6 +845,7 @@ export default {
   background-color: white;
   display: flex;
   float: right;
+  top: 9rem;
 
   &__svg {
     transform: scaleX(-1);

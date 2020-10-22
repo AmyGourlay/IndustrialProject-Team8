@@ -38,6 +38,7 @@
 <script>
 import Header from '~/components/Header'
 import BlackButton from '~/components/BlackButton'
+import GameMusic from '~/components/GameMusic'
 import router from '../router'
 /*
 const LobbyCodeModal = {
@@ -95,7 +96,7 @@ export default {
       }
       else {  // if there is something in the nickname field, then ask for the lobby ID
         let nicknameVar = `nickname=${document.getElementById("nicknameInput").value};lobbyId=0;playerExists=${this.playerExistsAlready}`;
-        this.$router.push({ name: 'lobby', params: {playerDeets: nicknameVar}});
+        this.$router.push({ name: 'lobby', params: {playerInfo: nicknameVar}});
       }
     },
 
