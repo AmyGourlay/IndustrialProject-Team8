@@ -176,4 +176,15 @@ export default {
   margin-left: auto;
   margin-right: auto;
 }
+.joinButton
+{
+  margin-top: 30px;
+  text-align: center;
+}
+.createButton
+{
+  margin-top: 10px;
+  text-align: center;
+}
+
 </style>

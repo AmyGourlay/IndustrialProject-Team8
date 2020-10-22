@@ -49,11 +49,10 @@
     </div>
     <div class="tile is-ancestor">
       <div class="tile is-parent is-vertical buttons">
-        <b-button @click="checkAnswer('ansOne')" class="tile is-child border is-white answerButton" id="ansOneA">
+        <b-button @click="checkAnswer('ansOne')" class="tile is-child border is-white answerButton" id="ansOneA" opacity="1">
           <p class="is-size-4 answerLabel" id="ansOne">----</p>
         </b-button>
-        <b-button @click="checkAnswer('ansTwo')" class="tile is-child border is-white answerButton" id="ansTwoA">
-          <p class="is-size-4 answerLabel" id="ansTwo">----</p>
+        <b-button @click="checkAnswer('ansTwo')" class="tile is-child border is-white answerButton" id="ansTwoA" opacity="1">
         </b-button>
       </div>
       <div class="tile is-parent is-vertical buttons">
@@ -259,10 +258,18 @@ export default {
             document.getElementById("ansFourA").style.backgroundColor = "green";
           }
         }
-      setTimeout(() => {
+      this.disableAnswerButtons();
+      setTimeout(() => { 
         this.resetAnswerButtons();
         this.getNextQuestion();
       }, 2000);
+    },
+
+    disableAnswerButtons() {
+      document.getElementById("ansOneA").disabled = true;
+      document.getElementById("ansTwoA").disabled = true;
+      document.getElementById("ansThreeA").disabled = true;
+      document.getElementById("ansFourA").disabled = true;
     },
 
     /*
@@ -288,6 +295,7 @@ export default {
      */
     fiftyfiftyLifeline() {
 
+      this.lifeline5050 = false;
       document.getElementById("fiftyfifty").disabled = true; //disable lifeline after 1 use
       let answer;
 
@@ -319,39 +327,43 @@ export default {
       console.log("RANDOM2:"+random2);
 
       if (random2 == 1 || random == 1) {
-        //document.getElementById("ansOne").style.backgroundColor = "grey";
-        //document.getElementById("ansOneA").style.backgroundColor = "grey";
+        document.getElementById("ansOne").style.backgroundColor = "grey";
+        document.getElementById("ansOneA").style.backgroundColor = "grey";
         document.getElementById("ansOneA").disabled = true;
         console.log("HERE1");
       }
 
       if (random2 == 2 || random == 2) {
-        //document.getElementById("ansTwo").style.backgroundColor = "grey";
-        //document.getElementById("ansTwoA").style.backgroundColor = "grey";
+        document.getElementById("ansTwo").style.backgroundColor = "grey";
+        document.getElementById("ansTwoA").style.backgroundColor = "grey";
         document.getElementById("ansTwoA").disabled = true;
         console.log("HERE2");
       }
 
       if (random2 == 3 || random == 3) {
-        //document.getElementById("ansThree").style.backgroundColor = "grey";
-        //document.getElementById("ansThreeA").style.backgroundColor = "grey";
+        document.getElementById("ansThree").style.backgroundColor = "grey";
+        document.getElementById("ansThreeA").style.backgroundColor = "grey";
         document.getElementById("ansThreeA").disabled = true;
         console.log("HERE3");
       }
 
       if (random2 == 4 || random == 4) {
-        //document.getElementById("ansFour").style.backgroundColor = "grey";
-        //document.getElementById("ansFourA").style.backgroundColor = "grey";
+        document.getElementById("ansFour").style.backgroundColor = "grey";
+        document.getElementById("ansFourA").style.backgroundColor = "grey";
         document.getElementById("ansFourA").disabled = true;
         console.log("HERE4");
       }
+
+      this.updatePlayerTable();
     },
 
     /*
      *  Function to skip a question without losing points or their streak for skip lifeline
      */
     skipLifeline() {
+      this.lifelineSkip = false;
       document.getElementById("skip").disabled = true; //disable lifeline after 1 use
+      this.updatePlayerTable();
       this.getNextQuestion();
     },
 
@@ -633,10 +645,12 @@ export default {
           body: JSON.stringify(request)
         }).then((res) => res.json());
         this.currQuestion = playerInfo.questionIndex;
+        this.lifeline5050 = playerInfo.lifeline5050;
+        this.lifelineSkip = playerInfo.lifelineSkip;
       }
       console.info(`current question: ${this.currQuestion}`);
       if (this.currQuestion == 20) { // TODO: end of game
-        alert("Game over!");
+        //alert("Game over!");
         window.location.href = "/results";
         const allAnsButtons = document.getElementsByClassName("answerButton");
         let ansButton;
@@ -655,6 +669,12 @@ export default {
         }
         return 0;
       }*/
+      if(this.lifeline5050 == false) {
+        document.getElementById("fiftyfifty").disabled = true; //if lifeline has already been used, disable the button
+      }
+      if(this.lifelineSkip == false) {
+        document.getElementById("skip").disabled = true; //if lifeline has already been used, disable the button
+      }
       document.getElementById("questionNumber").innerHTML = `Question ${this.currQuestion+1}`;  // updates the question number and the topic
       document.getElementById("questionTopic").innerHTML = `Difficulty: ${this.allQuestions[this.currQuestion].difficulty} <br>Topic: ${this.allQuestions[this.currQuestion].category} </br>`
       document.getElementById("questionBox").innerHTML = this.allQuestions[this.currQuestion].question;  // updates the question box and shows the question to the player
@@ -699,7 +719,7 @@ export default {
       clearInterval(this.timerInterval);
       this.updatePlayerScoreAndPos(-500);
       this.getNextQuestion();
-      this.streak == 0;
+      this.streak=0;
     },
 
     /*
@@ -809,6 +829,11 @@ export default {
   .answerButton {
     border-color: black !important;
   }
+
+  .answerButton:disabled {
+    opacity: 1;
+  }
+
   .border{
     border: 3px solid black;
   }
