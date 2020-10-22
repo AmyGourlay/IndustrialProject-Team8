@@ -17,8 +17,6 @@ export default {
 }
 </script>
 
-</script>
-
 <style>
 .is-black {
   background-color: black;

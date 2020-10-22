@@ -36,8 +36,8 @@
           <p class="title is-centered">Lifelines</p>
           <p class="subtitle is-centered">Need some help? This is the place!</p>
           <div class="buttons is-centered">
-            <b-button class="lifeline is-yellow">50/50</b-button>
-            <b-button class="lifeline is-yellow">Skip Question</b-button>
+            <b-button @click="fiftyfiftyLifeline()" class="lifeline is-yellow" id="fiftyfifty">50/50</b-button>
+            <b-button @click="skipLifeline()" class="lifeline is-yellow" id="skip">Skip Question</b-button>
           </div>
         </article>
         <article class="tile is-child box border">
@@ -52,19 +52,18 @@
       <audio id="correct" src="~/assets/CorrectAnswer.mp3"></audio>
       <audio id="incorrect" src="~/assets/IncorrectAnswer.mp3"></audio>
       <div class="tile is-parent is-vertical buttons">
-        <b-button @click="checkAnswer('ansOne')" class="tile is-child border is-white answerButton" id="ansOneA">
-          <p class="is-size-2-tablet answerLabel" id="ansOne">----</p>
+        <b-button @click="checkAnswer('ansOne')" class="tile is-child border is-white answerButton" id="ansOneA" opacity="1">
+          <p class="is-size-4 answerLabel" id="ansOne">----</p>
         </b-button>
-        <b-button @click="checkAnswer('ansTwo')" class="tile is-child border is-white answerButton" id="ansTwoA">
-          <p class="is-size-2-tablet answerLabel" id="ansTwo">----</p>
+        <b-button @click="checkAnswer('ansTwo')" class="tile is-child border is-white answerButton" id="ansTwoA" opacity="1">
         </b-button>
       </div>
       <div class="tile is-parent is-vertical buttons">
         <b-button @click="checkAnswer('ansThree')" class="tile is-child border is-white answerButton" id="ansThreeA">
-          <p class="is-size-2-tablet answerLabel" id="ansThree">----</p>
+          <p class="is-size-4 answerLabel" id="ansThree">----</p>
         </b-button>
         <b-button @click="checkAnswer('ansFour')" class="tile is-child border is-white answerButton" id="ansFourA">
-          <p class="is-size-2-tablet answerLabel" id="ansFour">----</p>
+          <p class="is-size-4 answerLabel" id="ansFour">----</p>
         </b-button>
       </div>
       <div class="tile is-parent is-4"> <!-- LEADERBOARD TILE -->
@@ -129,9 +128,9 @@ const COLOR_CODES = {
 
 //Setting timer duration
 const TIME_LIMIT = 30;
-
+import router from '../router'
 export default {
-  name: 'Game',
+  name: 'game',
   metaInfo: {
     meta: [
       { charset: 'utf-8' },
@@ -141,7 +140,7 @@ export default {
   data() {
     return {
         tableData: [],
-        currQuestion: 1,
+        currQuestion: 0,
         lifeline5050: true,
         lifelineSkip: true,
         nickname: "",
@@ -168,15 +167,37 @@ export default {
       allQuestions: [],
     }
   },
+  created() {
+    let playerInfo = this.$route.params.playerInfo;
+    console.log(playerInfo);
+    let tempPlayerInfo = playerInfo.split(";");
+    this.nickname = tempPlayerInfo[0].split("nickname=")[1];
+    let lobbyId = tempPlayerInfo[1].split("lobbyId=")[1];
+    document.getElementById("userNickname").innerHTML = this.nickname;
+    document.getElementById("lobbyCode").innerHTML = lobbyId;
+    console.log(lobbyId);//debug
+    let id = parseInt(lobbyId);
+    console.log(id);  //debug
+    this.startGame(id);
+  },
   methods: {
 
     /*
      *  Start Game function
      *  Starts the whole game process off. Runs once, takes no parameters.
      */
-    startGame() {
+    async startGame(lobbyId) {
       console.log("YAY");
-      this.getQs();
+      if (await this.getLobbyInfo(lobbyId)) {
+        this.getQs();
+      }
+    },
+
+    async getLobbyInfo(id) {
+      console.log(`get lobby info has ${id}`)
+      this.lobbyInfo = await fetch(`/quizApi/Lobbies/${id}`).then((res) => res.json());
+      console.log(this.lobbyInfo);
+      return true;
     },
 
     /*
@@ -207,18 +228,17 @@ export default {
      *  question, returns the appropriate message, adjusts their score and gets the next question.
      */
     async checkAnswer(buttonId) {
-      console.info(document.getElementById(buttonId).innerHTML)
+      console.info(document.getElementById(buttonId).innerHTML);
        
         if (document.getElementById(buttonId).innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
           //alert("Correct answer! ✔");
           document.getElementById(buttonId).style.backgroundColor = "green";
           document.getElementById(buttonId+"A").style.backgroundColor = "green";
           // audio for correct answer is played
-          var ca = document.getElementById("correct")
+          var ca = document.getElementById("correct");
           ca.play();
           this.streak+=1;
           this.updatePlayerScoreAndPos(((30-(this.timePassed))*10)*(this.streak));
-
         }
         else {
           //alert("Wrong answer! ❌");
@@ -246,8 +266,25 @@ export default {
             document.getElementById("ansFourA").style.backgroundColor = "green";
           }
         }
+      this.disableAnswerButtons();
       setTimeout(() => { 
-        document.getElementById("ansOne").style.backgroundColor = "white";
+        this.resetAnswerButtons();
+        this.getNextQuestion();
+      }, 2000);
+    },
+
+    disableAnswerButtons() {
+      document.getElementById("ansOneA").disabled = true;
+      document.getElementById("ansTwoA").disabled = true;
+      document.getElementById("ansThreeA").disabled = true;
+      document.getElementById("ansFourA").disabled = true;
+    },
+
+    /*
+     *  Function to reset all answer button colours and re-enable them all
+     */
+    resetAnswerButtons() {
+      document.getElementById("ansOne").style.backgroundColor = "white";
         document.getElementById("ansOneA").style.backgroundColor = "white";
         document.getElementById("ansTwo").style.backgroundColor = "white";
         document.getElementById("ansTwoA").style.backgroundColor = "white";
@@ -255,8 +292,87 @@ export default {
         document.getElementById("ansThreeA").style.backgroundColor = "white";
         document.getElementById("ansFour").style.backgroundColor = "white";
         document.getElementById("ansFourA").style.backgroundColor = "white";
-        this.getNextQuestion();
-      }, 2000);
+        document.getElementById("ansOneA").disabled = false;
+        document.getElementById("ansTwoA").disabled = false;
+        document.getElementById("ansThreeA").disabled = false;
+        document.getElementById("ansFourA").disabled = false;
+    },
+
+    /*
+     *  Function to remove two incorrect answers for 50/50 lifeline
+     */
+    fiftyfiftyLifeline() {
+
+      this.lifeline5050 = false;
+      document.getElementById("fiftyfifty").disabled = true; //disable lifeline after 1 use
+      let answer;
+
+      if (document.getElementById("ansOne").innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
+        answer = 1;
+      }
+      else if (document.getElementById("ansTwo").innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
+        answer = 2;
+      }
+      else if (document.getElementById("ansThree").innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
+        answer = 3;
+      }
+      else if (document.getElementById("ansFour").innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
+        answer = 4;
+      }
+
+      console.log("ANSWER:"+answer);
+
+      let random = this.getRandomNum(1,4);
+      while (random==answer) {
+        random = this.getRandomNum(1,4);
+      }
+      let random2 = this.getRandomNum(1,4);
+      while (random2==answer || random2==random) {
+        random2 = this.getRandomNum(1,4);
+      }
+
+      console.log("RANDOM1:"+random);
+      console.log("RANDOM2:"+random2);
+
+      if (random2 == 1 || random == 1) {
+        document.getElementById("ansOne").style.backgroundColor = "grey";
+        document.getElementById("ansOneA").style.backgroundColor = "grey";
+        document.getElementById("ansOneA").disabled = true;
+        console.log("HERE1");
+      }
+
+      if (random2 == 2 || random == 2) {
+        document.getElementById("ansTwo").style.backgroundColor = "grey";
+        document.getElementById("ansTwoA").style.backgroundColor = "grey";
+        document.getElementById("ansTwoA").disabled = true;
+        console.log("HERE2");
+      }
+
+      if (random2 == 3 || random == 3) {
+        document.getElementById("ansThree").style.backgroundColor = "grey";
+        document.getElementById("ansThreeA").style.backgroundColor = "grey";
+        document.getElementById("ansThreeA").disabled = true;
+        console.log("HERE3");
+      }
+
+      if (random2 == 4 || random == 4) {
+        document.getElementById("ansFour").style.backgroundColor = "grey";
+        document.getElementById("ansFourA").style.backgroundColor = "grey";
+        document.getElementById("ansFourA").disabled = true;
+        console.log("HERE4");
+      }
+
+      this.updatePlayerTable();
+    },
+
+    /*
+     *  Function to skip a question without losing points or their streak for skip lifeline
+     */
+    skipLifeline() {
+      this.lifelineSkip = false;
+      document.getElementById("skip").disabled = true; //disable lifeline after 1 use
+      this.updatePlayerTable();
+      this.getNextQuestion();
     },
 
     /*
@@ -522,7 +638,6 @@ export default {
      *  Load Current Question function
      *  This function loads the current question - so it loads the data into the currQuestionJSON object from the lobbyInfo object.
      *  It decodes the question data, updates the question field as well as the difficulty, the topic and the question number fields.
-     *  TODO: this function should load the player's question index from the DB
      */
     async loadQs(firstLoad) {
       if (firstLoad) {  // if it's the first time that it's loading the game
@@ -538,10 +653,12 @@ export default {
           body: JSON.stringify(request)
         }).then((res) => res.json());
         this.currQuestion = playerInfo.questionIndex;
+        this.lifeline5050 = playerInfo.lifeline5050;
+        this.lifelineSkip = playerInfo.lifelineSkip;
       }
-      console.info(`current question: ${this.currQuestion - 1}`);
+      console.info(`current question: ${this.currQuestion}`);
       if (this.currQuestion == 20) { // TODO: end of game
-        alert("Game over!");
+        //alert("Game over!");
         window.location.href = "/results";
         const allAnsButtons = document.getElementsByClassName("answerButton");
         let ansButton;
@@ -560,7 +677,13 @@ export default {
         }
         return 0;
       }*/
-      document.getElementById("questionNumber").innerHTML = `Question ${this.currQuestion}`;  // updates the question number and the topic
+      if(this.lifeline5050 == false) {
+        document.getElementById("fiftyfifty").disabled = true; //if lifeline has already been used, disable the button
+      }
+      if(this.lifelineSkip == false) {
+        document.getElementById("skip").disabled = true; //if lifeline has already been used, disable the button
+      }
+      document.getElementById("questionNumber").innerHTML = `Question ${this.currQuestion+1}`;  // updates the question number and the topic
       document.getElementById("questionTopic").innerHTML = `Difficulty: ${this.allQuestions[this.currQuestion].difficulty} <br>Topic: ${this.allQuestions[this.currQuestion].category} </br>`
       document.getElementById("questionBox").innerHTML = this.allQuestions[this.currQuestion].question;  // updates the question box and shows the question to the player
       this.updateQuestion();
@@ -604,7 +727,7 @@ export default {
       clearInterval(this.timerInterval);
       this.updatePlayerScoreAndPos(-500);
       this.getNextQuestion();
-      this.streak == 0;
+      this.streak=0;
     },
 
     /*
@@ -692,14 +815,14 @@ export default {
    *  This function also gets the score and player info from the DB via update player score and position function.
    */
   async fetch() {
+    /*
     let lobbyId = this.getGameDetails();
     this.lobbyInfo = await fetch(`/quizApi/Lobbies/${lobbyId}`).then((res) => res.json());
     console.info(this.lobbyInfo);
-
     document.getElementById("lobbyCode").innerHTML = this.lobbyInfo.id;
     document.getElementById("userNickname").innerHTML = this.nickname;
     this.updatePlayerScoreAndPos(0);
-    this.startGame();
+    this.startGame();*/
   },
 }
 
@@ -714,6 +837,11 @@ export default {
   .answerButton {
     border-color: black !important;
   }
+
+  .answerButton:disabled {
+    opacity: 1;
+  }
+
   .border{
     border: 3px solid black;
   }

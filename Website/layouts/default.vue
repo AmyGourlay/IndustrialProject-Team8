@@ -2,6 +2,7 @@
   <div class="background">
     <nav class="navbar" role="navigation" aria-label="main navigation">
       <!-- game music is played in this layout so it runs continously while navigating through the site -->
+
       <GameMusic />
       <!--<div class="columns is-4 is-offset-1 navbar-item">
         <div class="tile">
@@ -23,12 +24,12 @@
         </a>
 
           <a class="navbar-item">
-            <p class="is-size-4-touch" style="margin-right: 5px">Lobby code: </p>
-            <p class="is-size-4-touch" id="lobbyCode">----</p>
+            <p class="is-size-4" style="margin-right: 5px">Lobby code: </p>
+            <p class="is-size-4" id="lobbyCode">----</p>
           </a>
           <a class="navbar-item">
-            <p class="is-size-4-touch" style="margin-right: 5px"> Nickname: </p>
-            <p class="is-size-4-touch" id="userNickname">----</p>
+            <p class="is-size-4" style="margin-right: 5px"> Nickname: </p>
+            <p class="is-size-4" id="userNickname">----</p>
           </a>
         </div>
         <div class="navbar-end">
