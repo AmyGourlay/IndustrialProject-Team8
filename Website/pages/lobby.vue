@@ -20,7 +20,7 @@
       </div>
       <div class="buttons is-mobile is-centered">
         <div class="is-3">
-            <BlackButton @click.native="startGame">Start Game</BlackButton>
+            <BlackButton @click.native="startGame" title="Start Game"></BlackButton>
         </div>
         <div class="is-3">
           <router-link to="/"><BlackButton title="Leave Game"></BlackButton></router-link>

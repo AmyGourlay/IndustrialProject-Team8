@@ -19,7 +19,7 @@
       </div>
       <div class="columns is-mobile is-centered is-gapless">
         <div class="column is-3">
-          <router-link to="/lobby"><BlackButton title="Play Again"></BlackButton></router-link>
+          <router-link to="/"><BlackButton title="Return to Home"></BlackButton></router-link>
         </div>
       </div>
     </section>
@@ -61,55 +61,34 @@ export default {
       lobbyInfo: []
     }
   },
+  created() {
+    let playerInfo = this.$route.params.playerInfo;
+    console.log(playerInfo);
+    let tempPlayerInfo = playerInfo.split(";");
+    this.nickname = tempPlayerInfo[0].split("nickname=")[1];
+    let lobbyId = tempPlayerInfo[1].split("lobbyId=")[1];
+    document.getElementById("userNickname").innerHTML = this.nickname;
+    document.getElementById("lobbyCode").innerHTML = lobbyId;
+    console.log(lobbyId);//debug
+    lobbyId = parseInt(lobbyId);
+    this.loadResults(lobbyId);
+  },
   methods: {
 
-    /*
-     *  Get Game Details function
-     *  This function gets the player's info so that their score and details can be pulled from the database
-     */
-    getGameDetails() {
-      let allCookies = document.cookie;
-      let cookieArr = allCookies.split('; ');
-      let nickname;
-      let lobbyId;
-      let cookie;
-      for (cookie of cookieArr) {
-        if (cookie.includes("nickname")) {
-          nickname = cookie.split("nickname=")[1];
-        }
-        if (cookie.includes("lobbyId")) {
-          lobbyId = cookie.split("lobbyId=")[1];
-        }
+    async loadResults(id) {
+      if (await this.getLobbyInfo(id)) {
+        document.getElementById("lobbyCode").innerHTML = this.lobbyInfo.id;
+        document.getElementById("userNickname").innerHTML = this.nickname;
+        this.updatePlayerScoreAndPos();
+        this.refreshLeaderboard();
       }
-      this.nickname = nickname;
-      return lobbyId;
     },
 
-
-    /*
-     *  Update Player Table function
-     *  Updates the database with the Player's info, such as their score, what question they're up to etc.
-     *  Currently, it sends everything back to the database, rather than just what needs updating.
-     */
-    async updatePlayerTable(){
-      let playerInfo = {
-        name: this.nickname,
-        Score: this.score,
-        lobbyId: this.lobbyInfo.id,
-        questionIndex: this.currQuestion,
-        Lifeline5050: this.lifeline5050,
-        LifelineSkip: this.lifelineSkip
-      };
-      console.info(playerInfo);
-      const response = await fetch('/quizApi/Players', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json;charset=utf-8'
-        },
-        body: JSON.stringify(playerInfo)
-      });
-      console.info("update player table !!!");
-      console.info(response);
+    async getLobbyInfo(id) {
+      console.log(`get lobby info has ${id}`)
+      this.lobbyInfo = await fetch(`/quizApi/Lobbies/${id}`).then((res) => res.json());
+      console.log(this.lobbyInfo);
+      return true;
     },
 
     async updatePlayerScoreAndPos() {
@@ -161,20 +140,6 @@ export default {
     }
   },
 
-  /*
-   *  The starting function!
-   *  This function is what is called when the page loads.
-   *  The lobby information is loaded locally from the database and the player's nickname and lobby ID field are updated on screen.
-   *  This function also gets the score and player info from the DB via update player score and position function.
-   */
-  async fetch() {
-    let lobbyId = this.getGameDetails();
-    this.lobbyInfo = await fetch(`/quizApi/Lobbies/${lobbyId}`).then((res) => res.json());
-    document.getElementById("lobbyCode").innerHTML = this.lobbyInfo.id;
-    document.getElementById("userNickname").innerHTML = this.nickname;
-    this.updatePlayerScoreAndPos();
-    this.refreshLeaderboard();
-  },
 }
 
 </script>

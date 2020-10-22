@@ -15,7 +15,7 @@ export default new Router({
             component: home
         },
         {
-          path: '/lobby/:playerDeets',
+          path: '/lobby/:playerInfo',
           name: 'lobby',
           component: lobby
         },
@@ -23,6 +23,12 @@ export default new Router({
             path: '/game/:playerInfo',
             name: 'game',
             component: () => import('./pages/game.vue'),
+            params: true
+        },
+        {
+            path: '/results/:playerInfo',
+            name: 'results',
+            component: () => import('./pages/results.vue'),
             params: true
         }
     ]
