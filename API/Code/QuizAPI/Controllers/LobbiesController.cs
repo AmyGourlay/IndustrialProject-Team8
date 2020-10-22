@@ -154,33 +154,24 @@ namespace QuizAPI.Controllers
 
             //Setup the random generator
             Random rnd = new Random();
-            lobby.id = rnd.Next(10000000, 99999999);
+            int id = rnd.Next(10000000, 99999999);
 
-            //Setup the command
-            SqlCommand cmd = new SqlCommand("SELECT * FROM lobby WHERE id=" + lobby.id + ";", cnn);
-            cnn.Open();
-            SqlDataReader data = cmd.ExecuteReader();
-
-            while (data.HasRows == true) //Check if lobby id exists
-            {
-                lobby.id = rnd.Next(10000000, 99999999);
-                cmd.Dispose();
-                cmd = new SqlCommand("SELECT * FROM lobby WHERE id=" + lobby.id + ";", cnn);
-                data = cmd.ExecuteReader();
-            }
-
-            data.Close();
-            cmd.Dispose();
 
             //Change the command to insert the record
-            cmd = new SqlCommand("INSERT INTO lobby(id, requestURL, date) " +
-                                 "VALUES(" + lobby.id + "', '" + lobby.requestURL + "', '" + lobby.date + "');", cnn);
+            SqlCommand cmd = new SqlCommand("INSERT INTO lobby(id, requestURL, date) " +
+                                 "VALUES(" + id + ", '" + lobby.requestURL + "', '" + lobby.date + "');", cnn);
 
+            cnn.Open();
             cmd.ExecuteNonQuery(); //Executes the command
             cmd.Dispose();
             cnn.Close();
 
-            return CreatedAtAction("GetLobby", new { id = lobby.id }, lobby);
+            //create copy of new lobby to return
+            Lobby l = new Lobby();
+            l.id = id;
+            l.requestURL = lobby.requestURL;
+            l.date = lobby.date;
+            return l;
         }
 
         ////**** DELETE ****////
