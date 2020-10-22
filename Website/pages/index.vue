@@ -36,7 +36,6 @@
 </template>
 
 <script>
-import GameMusic from '~/components/GameMusic'
 import Header from '~/components/Header'
 import BlackButton from '~/components/BlackButton'
 import router from '../router'
@@ -142,7 +141,6 @@ export default {
         document.getElementById("lobbyField").style.visibility = "visible";
         let lobbyIDinput = document.getElementById("LobbyIDInput").value;
         let nicknameInput = document.getElementById("nicknameInput").value;
-
         if (lobbyIDinput.length == 8 && !isNaN(lobbyIDinput) && await this.runLobbyChecks(lobbyIDinput, nicknameInput)) { // check if its an 8 digit number
           let playerString = `nickname=${nicknameInput};lobbyId=${lobbyIDinput};playerExists=${this.playerExistsAlready}`;
           alert(`redirected! ${playerString}`);

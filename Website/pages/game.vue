@@ -48,6 +48,9 @@
       </div>
     </div>
     <div class="tile is-ancestor">
+      <!-- audio will be played when option is selcted -->
+      <audio id="correct" src="~/assets/CorrectAnswer.mp3"></audio>
+      <audio id="incorrect" src="~/assets/IncorrectAnswer.mp3"></audio>
       <div class="tile is-parent is-vertical buttons">
         <b-button @click="checkAnswer('ansOne')" class="tile is-child border is-white answerButton" id="ansOneA" opacity="1">
           <p class="is-size-4 answerLabel" id="ansOne">----</p>
@@ -224,21 +227,26 @@ export default {
      *  Called when the player clicks any of the four answer buttons, it checks if the button pressed contained the correct answer to the
      *  question, returns the appropriate message, adjusts their score and gets the next question.
      */
-    checkAnswer(buttonId) {
-      console.info(document.getElementById(buttonId).innerHTML)
-
+    async checkAnswer(buttonId) {
+      console.info(document.getElementById(buttonId).innerHTML);
+       
         if (document.getElementById(buttonId).innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
           //alert("Correct answer! ✔");
           document.getElementById(buttonId).style.backgroundColor = "green";
           document.getElementById(buttonId+"A").style.backgroundColor = "green";
+          // audio for correct answer is played
+          var ca = document.getElementById("correct");
+          ca.play();
           this.streak+=1;
           this.updatePlayerScoreAndPos(((30-(this.timePassed))*10)*(this.streak));
-
         }
         else {
           //alert("Wrong answer! ❌");
           document.getElementById(buttonId).style.backgroundColor = "red";
           document.getElementById(buttonId+"A").style.backgroundColor = "red";
+          // audio for incorrect answer is played
+          var ia = document.getElementById("incorrect")
+          ia.play();
           this.streak=0;
           this.updatePlayerScoreAndPos(-500);
           if (document.getElementById("ansOne").innerHTML == this.allQuestions[this.currQuestion].correct_answer) {

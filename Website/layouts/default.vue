@@ -1,6 +1,8 @@
 <template>
   <div class="background">
     <nav class="navbar" role="navigation" aria-label="main navigation">
+      <!-- game music is played in this layout so it runs continously while navigating through the site -->
+
       <GameMusic />
       <!--<div class="columns is-4 is-offset-1 navbar-item">
         <div class="tile">

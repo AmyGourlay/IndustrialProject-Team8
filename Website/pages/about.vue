@@ -4,6 +4,7 @@
             <h2>Quizz.io</h2>
             <div class="media-content">
                 <h3>About Us</h3>
+                <!-- this is the about content -->
                 <p>
                     <br>
                     Lorem Ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
@@ -17,13 +18,11 @@
 </template>
 
 <script>
-    import GameMusic from '~/components/GameMusic'
     import BlackButton from '~/components/BlackButton'
     
     export default {
         components: 
             {
-                GameMusic,
                 BlackButton
             }
     }
