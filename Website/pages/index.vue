@@ -56,4 +56,5 @@ export default {
   margin-top: 10px;
   text-align: center;
 }
+
 </style>
