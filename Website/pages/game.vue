@@ -50,18 +50,18 @@
     <div class="tile is-ancestor">
       <div class="tile is-parent is-vertical buttons">
         <b-button @click="checkAnswer('ansOne')" class="tile is-child border is-white answerButton" id="ansOneA">
-          <p class="is-size-2-tablet answerLabel" id="ansOne">----</p>
+          <p class="is-size-4 answerLabel" id="ansOne">----</p>
         </b-button>
         <b-button @click="checkAnswer('ansTwo')" class="tile is-child border is-white answerButton" id="ansTwoA">
-          <p class="is-size-2-tablet answerLabel" id="ansTwo">----</p>
+          <p class="is-size-4 answerLabel" id="ansTwo">----</p>
         </b-button>
       </div>
       <div class="tile is-parent is-vertical buttons">
         <b-button @click="checkAnswer('ansThree')" class="tile is-child border is-white answerButton" id="ansThreeA">
-          <p class="is-size-2-tablet answerLabel" id="ansThree">----</p>
+          <p class="is-size-4 answerLabel" id="ansThree">----</p>
         </b-button>
         <b-button @click="checkAnswer('ansFour')" class="tile is-child border is-white answerButton" id="ansFourA">
-          <p class="is-size-2-tablet answerLabel" id="ansFour">----</p>
+          <p class="is-size-4 answerLabel" id="ansFour">----</p>
         </b-button>
       </div>
       <div class="tile is-parent is-4"> <!-- LEADERBOARD TILE -->
@@ -126,9 +126,9 @@ const COLOR_CODES = {
 
 //Setting timer duration
 const TIME_LIMIT = 30;
-
+import router from '../router'
 export default {
-  name: 'Game',
+  name: 'game',
   metaInfo: {
     meta: [
       { charset: 'utf-8' },
@@ -138,7 +138,7 @@ export default {
   data() {
     return {
         tableData: [],
-        currQuestion: 1,
+        currQuestion: 0,
         lifeline5050: true,
         lifelineSkip: true,
         nickname: "",
@@ -165,15 +165,37 @@ export default {
       allQuestions: [],
     }
   },
+  created() {
+    let playerInfo = this.$route.params.playerInfo;
+    console.log(playerInfo);
+    let tempPlayerInfo = playerInfo.split(";");
+    this.nickname = tempPlayerInfo[0].split("nickname=")[1];
+    let lobbyId = tempPlayerInfo[1].split("lobbyId=")[1];
+    document.getElementById("userNickname").innerHTML = this.nickname;
+    document.getElementById("lobbyCode").innerHTML = lobbyId;
+    console.log(lobbyId);//debug
+    let id = parseInt(lobbyId);
+    console.log(id);  //debug
+    this.startGame(id);
+  },
   methods: {
 
     /*
      *  Start Game function
      *  Starts the whole game process off. Runs once, takes no parameters.
      */
-    startGame() {
+    async startGame(lobbyId) {
       console.log("YAY");
-      this.getQs();
+      if (await this.getLobbyInfo(lobbyId)) {
+        this.getQs();
+      }
+    },
+
+    async getLobbyInfo(id) {
+      console.log(`get lobby info has ${id}`)
+      this.lobbyInfo = await fetch(`/quizApi/Lobbies/${id}`).then((res) => res.json());
+      console.log(this.lobbyInfo);
+      return true;
     },
 
     /*
@@ -205,7 +227,7 @@ export default {
      */
     checkAnswer(buttonId) {
       console.info(document.getElementById(buttonId).innerHTML)
-       
+
         if (document.getElementById(buttonId).innerHTML == this.allQuestions[this.currQuestion].correct_answer) {
           //alert("Correct answer! ✔");
           document.getElementById(buttonId).style.backgroundColor = "green";
@@ -237,7 +259,7 @@ export default {
             document.getElementById("ansFourA").style.backgroundColor = "green";
           }
         }
-      setTimeout(() => { 
+      setTimeout(() => {
         this.resetAnswerButtons();
         this.getNextQuestion();
       }, 2000);
@@ -260,9 +282,9 @@ export default {
         document.getElementById("ansThreeA").disabled = false;
         document.getElementById("ansFourA").disabled = false;
     },
-   
+
     /*
-     *  Function to remove two incorrect answers for 50/50 lifeline 
+     *  Function to remove two incorrect answers for 50/50 lifeline
      */
     fiftyfiftyLifeline() {
 
@@ -309,7 +331,7 @@ export default {
         document.getElementById("ansTwoA").disabled = true;
         console.log("HERE2");
       }
-      
+
       if (random2 == 3 || random == 3) {
         //document.getElementById("ansThree").style.backgroundColor = "grey";
         //document.getElementById("ansThreeA").style.backgroundColor = "grey";
@@ -596,7 +618,6 @@ export default {
      *  Load Current Question function
      *  This function loads the current question - so it loads the data into the currQuestionJSON object from the lobbyInfo object.
      *  It decodes the question data, updates the question field as well as the difficulty, the topic and the question number fields.
-     *  TODO: this function should load the player's question index from the DB
      */
     async loadQs(firstLoad) {
       if (firstLoad) {  // if it's the first time that it's loading the game
@@ -613,7 +634,7 @@ export default {
         }).then((res) => res.json());
         this.currQuestion = playerInfo.questionIndex;
       }
-      console.info(`current question: ${this.currQuestion - 1}`);
+      console.info(`current question: ${this.currQuestion}`);
       if (this.currQuestion == 20) { // TODO: end of game
         alert("Game over!");
         window.location.href = "/results";
@@ -634,7 +655,7 @@ export default {
         }
         return 0;
       }*/
-      document.getElementById("questionNumber").innerHTML = `Question ${this.currQuestion}`;  // updates the question number and the topic
+      document.getElementById("questionNumber").innerHTML = `Question ${this.currQuestion+1}`;  // updates the question number and the topic
       document.getElementById("questionTopic").innerHTML = `Difficulty: ${this.allQuestions[this.currQuestion].difficulty} <br>Topic: ${this.allQuestions[this.currQuestion].category} </br>`
       document.getElementById("questionBox").innerHTML = this.allQuestions[this.currQuestion].question;  // updates the question box and shows the question to the player
       this.updateQuestion();
@@ -766,14 +787,14 @@ export default {
    *  This function also gets the score and player info from the DB via update player score and position function.
    */
   async fetch() {
+    /*
     let lobbyId = this.getGameDetails();
     this.lobbyInfo = await fetch(`/quizApi/Lobbies/${lobbyId}`).then((res) => res.json());
     console.info(this.lobbyInfo);
-
     document.getElementById("lobbyCode").innerHTML = this.lobbyInfo.id;
     document.getElementById("userNickname").innerHTML = this.nickname;
     this.updatePlayerScoreAndPos(0);
-    this.startGame();
+    this.startGame();*/
   },
 }
 
