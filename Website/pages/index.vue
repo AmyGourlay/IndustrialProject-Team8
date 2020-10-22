@@ -1,6 +1,5 @@
 <template>
 <div>
-  <!--<GameMusic />-->
   <section class="section">
     <div class="columns is-mobile">
       <!--<Header></Header>-->
@@ -23,7 +22,6 @@
 </template>
 
 <script>
-import GameMusic from '~/components/GameMusic'
 import Header from '~/components/Header'
 import BlackButton from '~/components/BlackButton'
 
@@ -31,8 +29,7 @@ export default {
   name: 'HomePage',
   components: {
     Header,
-    BlackButton,
-    GameMusic
+    BlackButton
   }
 
 }

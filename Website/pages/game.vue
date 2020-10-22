@@ -48,6 +48,7 @@
       </div>
     </div>
     <div class="tile is-ancestor">
+      <!-- audio will be played when option is selcted -->
       <audio id="correct" src="~/assets/CorrectAnswer.mp3"></audio>
       <audio id="incorrect" src="~/assets/IncorrectAnswer.mp3"></audio>
       <div class="tile is-parent is-vertical buttons">
@@ -212,6 +213,7 @@ export default {
           //alert("Correct answer! ✔");
           document.getElementById(buttonId).style.backgroundColor = "green";
           document.getElementById(buttonId+"A").style.backgroundColor = "green";
+          // audio for correct answer is played
           var ca = document.getElementById("correct")
           ca.play();
           this.streak+=1;
@@ -222,6 +224,7 @@ export default {
           //alert("Wrong answer! ❌");
           document.getElementById(buttonId).style.backgroundColor = "red";
           document.getElementById(buttonId+"A").style.backgroundColor = "red";
+          // audio for incorrect answer is played
           var ia = document.getElementById("incorrect")
           ia.play();
           this.streak=0;
