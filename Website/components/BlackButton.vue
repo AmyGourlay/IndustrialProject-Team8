@@ -1,8 +1,8 @@
 <template>
     <section>
-        <div class="Readybutton">
+        <b-field class="Readybutton">
             <b-button type="is-black" size="is-large">{{ title }}</b-button>
-        </div>
+        </b-field>
     </section>
 </template>
 

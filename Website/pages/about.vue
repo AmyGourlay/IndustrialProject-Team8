@@ -7,7 +7,41 @@
                 <!-- this is the about content -->
                 <p>
                     <br>
-                    Lorem Ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+                    This game was built by Team 8 for AC41004 - Industrial Team Project.
+                    <br>
+                    <br>
+                    <b>Credits</b>
+                    <br>
+                    <br>
+                    <b>Product Design</b>
+                    <br>
+                    Amy Gourlay,
+                    Renata Jeny,
+                    Yousaf Nasir,
+                    Mandar Tamhane,
+                    Sebastian Thomas
+                    <br>
+                    <br>
+                    <b>Product Development</b>
+                    <br>
+                    Arnav Dhawan,
+                    Kyle Leggate,
+                    Dominika Piosik,
+                    Steven Marshall
+                    <br>
+                    Mo Nadat,
+                    Amy Gourlay,
+                    Sebastian Thomas
+                    <br>
+                    <br>
+                    <b>Project Manager</b>
+                    <br>
+                    Renata Jeny
+                    <br>
+                    <br>
+                    <b>Questions</b>
+                    <br>
+                    OpenTrivia Database
                 </p>
                 <p><br> Made with 💖 © Riddlers 2020</p>
                 <br>
@@ -45,9 +79,9 @@
 }
 .content
 {
-    margin: 0px;
+    margin: auto;
     justify-content: center;
-    text-align: center
+    text-align: center;
 }
 .content h2 
 {
